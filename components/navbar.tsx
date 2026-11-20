@@ -2,9 +2,11 @@
 
 import { Menu, X } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import * as React from "react"
 
 import { Button, buttonVariants } from "@/components/ui/button"
+import { signOut, useSession } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -17,6 +19,15 @@ const navLinks = [
 
 export function Navbar() {
   const [open, setOpen] = React.useState(false)
+  const router = useRouter()
+  const { data: session } = useSession()
+
+  async function handleLogout() {
+    await signOut()
+    setOpen(false)
+    router.push("/")
+    router.refresh()
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -41,15 +52,31 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Link href="/login" className={cn(buttonVariants({ variant: "ghost" }))}>
-            Login
-          </Link>
-          <Link
-            href="/register"
-            className={cn(buttonVariants({ variant: "default" }))}
-          >
-            Register
-          </Link>
+          {session ? (
+            <>
+              <Link
+                href="/dashboard"
+                className={cn(buttonVariants({ variant: "ghost" }))}
+              >
+                Dashboard
+              </Link>
+              <Button variant="default" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className={cn(buttonVariants({ variant: "ghost" }))}>
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className={cn(buttonVariants({ variant: "default" }))}
+              >
+                Register
+              </Link>
+            </>
+          )}
         </div>
 
         <Button
@@ -78,20 +105,37 @@ export function Navbar() {
               </Link>
             ))}
             <div className="mt-2 flex flex-col gap-2 border-t pt-4">
-              <Link
-                href="/login"
-                className={cn(buttonVariants({ variant: "outline" }), "w-full")}
-                onClick={() => setOpen(false)}
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className={cn(buttonVariants({ variant: "default" }), "w-full")}
-                onClick={() => setOpen(false)}
-              >
-                Register
-              </Link>
+              {session ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+                    onClick={() => setOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <Button variant="default" className="w-full" onClick={handleLogout}>
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+                    onClick={() => setOpen(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className={cn(buttonVariants({ variant: "default" }), "w-full")}
+                    onClick={() => setOpen(false)}
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>

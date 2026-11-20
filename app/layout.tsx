@@ -1,6 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
+import "react-toastify/dist/ReactToastify.css"
+import { ToastContainer } from "react-toastify"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Navbar } from "@/components/navbar"
 import { cn } from "@/lib/utils"
@@ -27,6 +29,7 @@ export default function RootLayout({
         <ThemeProvider>
           <Navbar />
           {children}
+          <ToastContainer position="top-right" />
         </ThemeProvider>
       </body>
     </html>
