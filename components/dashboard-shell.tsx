@@ -1,0 +1,104 @@
+"use client"
+
+import {
+  ClipboardList,
+  LayoutDashboard,
+  Package,
+  PlusCircle,
+  UserRound,
+} from "lucide-react"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import * as React from "react"
+
+import { Button } from "@/components/ui/button"
+import { signOut, useSession } from "@/lib/auth-client"
+import { cn } from "@/lib/utils"
+
+const dashboardLinks = [
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/add-equipment", label: "Add Equipment", icon: PlusCircle },
+  { href: "/dashboard/my-equipment", label: "My Equipment", icon: Package },
+  {
+    href: "/dashboard/my-equipment-rental",
+    label: "My Equipment Rental",
+    icon: ClipboardList,
+  },
+  { href: "/dashboard/my-profile", label: "My Profile", icon: UserRound },
+]
+
+export function DashboardShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+  const router = useRouter()
+  const { data: session } = useSession()
+  const [mobileOpen, setMobileOpen] = React.useState(false)
+
+  async function handleLogout() {
+    await signOut()
+    setMobileOpen(false)
+    router.push("/")
+    router.refresh()
+  }
+
+  return (
+    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row">
+      <aside className="lg:w-60 lg:shrink-0">
+        <Button
+          variant="outline"
+          className="w-full justify-between lg:hidden"
+          onClick={() => setMobileOpen((value) => !value)}
+          aria-expanded={mobileOpen}
+        >
+          Dashboard menu
+          <span className="text-xs text-muted-foreground">
+            {mobileOpen ? "Hide" : "Show"}
+          </span>
+        </Button>
+
+        <div className={cn("mt-3 space-y-1 lg:mt-0", mobileOpen ? "block" : "hidden lg:block")}>
+          {dashboardLinks.map((link) => {
+            const Icon = link.icon
+            const active = pathname === link.href
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className={cn(
+                  "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <Icon className="size-4" />
+                {link.label}
+              </Link>
+            )
+          })}
+          <div className="border-t pt-3 lg:hidden">
+            <Button variant="outline" className="w-full" onClick={handleLogout}>
+              Logout
+            </Button>
+          </div>
+        </div>
+      </aside>
+
+      <div className="min-w-0 flex-1 space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4 text-card-foreground shadow-sm">
+          <div>
+            <p className="text-xs text-muted-foreground">Owner dashboard</p>
+            <p className="text-sm font-medium">
+              {session?.user?.name || session?.user?.email || "Owner"}
+            </p>
+          </div>
+          <Button variant="outline" className="hidden lg:inline-flex" onClick={handleLogout}>
+            Logout
+          </Button>
+        </div>
+        {children}
+      </div>
+    </div>
+  )
+}
