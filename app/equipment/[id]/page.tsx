@@ -238,37 +238,46 @@ export default function EquipmentDetailsPage() {
       setIsSubmittingBooking(true)
       setBookingError(null)
 
-      const result = await createRentalBooking({
-        customerId: session.user.id,
-        customerName: session.user.name || "Customer",
-        customerEmail: session.user.email,
-        customerPhone: contactNumber || "N/A",
-        deliveryAddress: deliveryAddress || "Self-Pickup / Site Address",
-        additionalNotes: additionalNotes || "",
-        equipmentId: equipment._id || equipmentId,
-        equipmentName: equipment.equipmentName,
-        equipmentImage: equipment.image,
-        equipmentCategory: equipment.category,
-        location: equipment.location,
-        ownerId: equipment.ownerId,
-        ownerName: equipment.ownerName,
-        ownerEmail: equipment.ownerEmail,
-        startDate,
-        endDate,
-        durationDays: pricing.days,
-        requiredQuantity,
-        rentalPrice: equipment.rentalPrice,
-        rentalType: equipment.rentalType,
-        totalAmount: pricing.total,
-        paymentStatus: "Pending",
-        bookingStatus: "Pending",
+      // Call Next.js API route to create Stripe Checkout session (Section 3 of Stripe guide)
+      const res = await fetch("/api/checkout_sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          equipmentId: equipment._id || equipmentId,
+          equipmentName: equipment.equipmentName,
+          equipmentImage: equipment.image,
+          category: equipment.category,
+          location: equipment.location,
+          ownerId: equipment.ownerId,
+          ownerName: equipment.ownerName,
+          ownerEmail: equipment.ownerEmail,
+          customerId: session.user.id,
+          customerName: session.user.name || "Customer",
+          customerEmail: session.user.email,
+          customerPhone: contactNumber || "N/A",
+          deliveryAddress: deliveryAddress || "Self-Pickup / Site Address",
+          additionalNotes: additionalNotes || "",
+          startDate,
+          endDate,
+          durationDays: pricing.days,
+          quantity: requiredQuantity,
+          rentalPrice: equipment.rentalPrice,
+          rentalType: equipment.rentalType,
+          totalAmount: pricing.total,
+        }),
       })
 
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Failed to create Stripe Checkout session.")
+      }
+
       setIsBookingOpen(false)
-      const bookingId = result.id || (result.booking && (result.booking._id || result.booking.id)) || ""
-      router.push(`/payment?bookingId=${bookingId}`)
+      if (data.url) {
+        window.location.assign(data.url) // Direct redirect to Stripe Checkout
+      }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to confirm equipment booking."
+      const msg = err instanceof Error ? err.message : "Failed to initiate Stripe payment."
       setBookingError(msg)
     } finally {
       setIsSubmittingBooking(false)
@@ -827,9 +836,9 @@ export default function EquipmentDetailsPage() {
                   <Button
                     type="submit"
                     disabled={isSubmittingBooking}
-                    className="gap-2 font-semibold"
+                    className="gap-2 font-semibold bg-[#635bff] text-white hover:bg-[#5340eb]"
                   >
-                    {isSubmittingBooking ? "Checking Availability..." : "Proceed to Payment"}
+                    {isSubmittingBooking ? "Connecting to Stripe..." : "Pay with Stripe"}
                   </Button>
                 </div>
               </form>
