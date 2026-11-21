@@ -1,11 +1,14 @@
 "use client"
 
 import {
+  Bookmark,
   ClipboardList,
+  Heart,
   LayoutDashboard,
   Package,
   PlusCircle,
   UserRound,
+  Users,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -15,7 +18,7 @@ import { Button } from "@/components/ui/button"
 import { signOut, useSession } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
-const dashboardLinks = [
+const ownerLinks = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/add-equipment", label: "Add Equipment", icon: PlusCircle },
   { href: "/dashboard/my-equipment", label: "My Equipment", icon: Package },
@@ -24,6 +27,21 @@ const dashboardLinks = [
     label: "My Equipment Rental",
     icon: ClipboardList,
   },
+  { href: "/dashboard/my-profile", label: "My Profile", icon: UserRound },
+]
+
+const customerLinks = [
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/my-rentals", label: "My Rentals", icon: ClipboardList },
+  { href: "/dashboard/favorites", label: "Favorites", icon: Heart },
+  { href: "/dashboard/my-profile", label: "Profile", icon: UserRound },
+]
+
+const adminLinks = [
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/all-users", label: "All Users", icon: Users },
+  { href: "/dashboard/all-equipment", label: "All Equipment", icon: Package },
+  { href: "/dashboard/all-rentals", label: "All Rentals", icon: ClipboardList },
   { href: "/dashboard/my-profile", label: "My Profile", icon: UserRound },
 ]
 
@@ -39,6 +57,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     router.push("/")
     router.refresh()
   }
+
+  const role = session?.user?.role || "customer"
+  const links =
+    role === "owner" ? ownerLinks : role === "admin" ? adminLinks : customerLinks
+
+  const dashboardTitle =
+    role === "owner"
+      ? "Owner dashboard"
+      : role === "admin"
+      ? "Admin dashboard"
+      : "Customer dashboard"
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row">
@@ -56,7 +85,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </Button>
 
         <div className={cn("mt-3 space-y-1 lg:mt-0", mobileOpen ? "block" : "hidden lg:block")}>
-          {dashboardLinks.map((link) => {
+          {links.map((link) => {
             const Icon = link.icon
             const active = pathname === link.href
 
@@ -88,9 +117,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div className="min-w-0 flex-1 space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4 text-card-foreground shadow-sm">
           <div>
-            <p className="text-xs text-muted-foreground">Owner dashboard</p>
+            <p className="text-xs text-muted-foreground">{dashboardTitle}</p>
             <p className="text-sm font-medium">
-              {session?.user?.name || session?.user?.email || "Owner"}
+              {session?.user?.name || session?.user?.email || "User"}
             </p>
           </div>
           <Button variant="outline" className="hidden lg:inline-flex" onClick={handleLogout}>

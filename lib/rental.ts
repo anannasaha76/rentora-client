@@ -71,6 +71,28 @@ export async function getOwnerRentals(
   return res.json()
 }
 
+export async function getCustomerRentals(
+  customerEmail: string,
+  customerId?: string
+): Promise<RentalBooking[]> {
+  const query = new URLSearchParams()
+  if (customerEmail) query.set("email", customerEmail)
+  if (customerId) query.set("customerId", customerId)
+
+  const res = await fetch(`${equipmentApiUrl}/api/rentals/customer?${query.toString()}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+  })
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null)
+    throw new Error(errorData?.message || "Failed to fetch customer rentals.")
+  }
+
+  return res.json()
+}
+
 export async function updateRentalStatus(
   id: string,
   updates: { bookingStatus?: BookingStatus; paymentStatus?: PaymentStatus }

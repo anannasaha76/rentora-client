@@ -1,11 +1,21 @@
-import Link from "next/link"
-import { ClipboardList, Package, PlusCircle, UserRound } from "lucide-react"
+"use client"
 
-import { OwnerRouteGuard } from "@/components/owner-route-guard"
+import Link from "next/link"
+import {
+  ClipboardList,
+  Heart,
+  Package,
+  PlusCircle,
+  UserRound,
+  Users,
+} from "lucide-react"
+
+import { AuthRouteGuard } from "@/components/auth-route-guard"
 import { buttonVariants } from "@/components/ui/button"
+import { useSession } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
-const cards = [
+const ownerCards = [
   {
     href: "/dashboard/add-equipment",
     title: "Add Equipment",
@@ -15,32 +25,98 @@ const cards = [
   {
     href: "/dashboard/my-equipment",
     title: "My Equipment",
-    description: "Review the equipment you have listed for rent.",
+    description: "Review and manage the equipment you have listed for rent.",
     icon: Package,
   },
   {
     href: "/dashboard/my-equipment-rental",
     title: "My Equipment Rental",
-    description: "Keep track of rental requests for your equipment.",
+    description: "Track incoming rental requests and monitor equipment bookings.",
     icon: ClipboardList,
   },
   {
     href: "/dashboard/my-profile",
     title: "My Profile",
-    description: "View your owner account information.",
+    description: "View and update your owner account information.",
+    icon: UserRound,
+  },
+]
+
+const customerCards = [
+  {
+    href: "/dashboard/my-rentals",
+    title: "My Rentals",
+    description: "View and manage all your active and past equipment rental bookings.",
+    icon: ClipboardList,
+  },
+  {
+    href: "/dashboard/favorites",
+    title: "Favorites",
+    description: "Browse equipment you have saved for upcoming projects.",
+    icon: Heart,
+  },
+  {
+    href: "/dashboard/my-profile",
+    title: "My Profile",
+    description: "Manage your contact info, delivery address, and account preferences.",
+    icon: UserRound,
+  },
+]
+
+const adminCards = [
+  {
+    href: "/dashboard/all-users",
+    title: "All Users",
+    description: "View and manage registered customers, owners, and administrators.",
+    icon: Users,
+  },
+  {
+    href: "/dashboard/all-equipment",
+    title: "All Equipment",
+    description: "Review, approve, or moderate equipment listings across the platform.",
+    icon: Package,
+  },
+  {
+    href: "/dashboard/all-rentals",
+    title: "All Rentals",
+    description: "Monitor global transactions and platform-wide rental activities.",
+    icon: ClipboardList,
+  },
+  {
+    href: "/dashboard/my-profile",
+    title: "My Profile",
+    description: "Update administrator credentials and contact details.",
     icon: UserRound,
   },
 ]
 
 export default function DashboardPage() {
+  const { data: session } = useSession()
+  const role = session?.user?.role || "customer"
+
+  const cards =
+    role === "owner" ? ownerCards : role === "admin" ? adminCards : customerCards
+
+  const title =
+    role === "owner"
+      ? "Owner Dashboard"
+      : role === "admin"
+      ? "Admin Dashboard"
+      : "Customer Dashboard"
+
+  const subtitle =
+    role === "owner"
+      ? "Manage your equipment, rentals, and profile from one central hub."
+      : role === "admin"
+      ? "Platform moderation, user management, and global oversight."
+      : "Access your rental bookings, saved equipment, and account settings."
+
   return (
-    <OwnerRouteGuard>
+    <AuthRouteGuard>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Owner Dashboard</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage your equipment, rentals, and profile from one place.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -65,6 +141,6 @@ export default function DashboardPage() {
           })}
         </div>
       </div>
-    </OwnerRouteGuard>
+    </AuthRouteGuard>
   )
 }
