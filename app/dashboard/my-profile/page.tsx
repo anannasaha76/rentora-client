@@ -20,7 +20,7 @@ import {
 } from "lucide-react"
 import { toast } from "react-toastify"
 
-import { OwnerRouteGuard } from "@/components/owner-route-guard"
+import { AuthRouteGuard } from "@/components/auth-route-guard"
 import { Button } from "@/components/ui/button"
 import { useSession } from "@/lib/auth-client"
 import { getUserProfile, updateUserProfile, type UserProfile } from "@/lib/user"
@@ -44,7 +44,7 @@ export default function MyProfilePage() {
   const [image, setImage] = React.useState("")
   const [phoneNumber, setPhoneNumber] = React.useState("")
   const [address, setAddress] = React.useState("")
-  const [role, setRole] = React.useState("owner")
+  const [role, setRole] = React.useState("customer")
 
   const sessionEmail = session?.user?.email || ""
 
@@ -63,7 +63,7 @@ export default function MyProfilePage() {
         data?.phoneNumber || (session?.user as { phoneNumber?: string })?.phoneNumber || ""
       const activeAddress =
         data?.address || (session?.user as { address?: string })?.address || ""
-      const activeRole = data?.role || (session?.user as { role?: string })?.role || "owner"
+      const activeRole = data?.role || (session?.user as { role?: string })?.role || "customer"
 
       setName(activeName)
       setEmail(activeEmail)
@@ -93,7 +93,7 @@ export default function MyProfilePage() {
         setName(session.user.name || "")
         setEmail(session.user.email || "")
         setImage(session.user.image || "")
-        setRole((session.user as { role?: string })?.role || "owner")
+        setRole((session.user as { role?: string })?.role || "customer")
       }
     } finally {
       setLoading(false)
@@ -188,16 +188,21 @@ export default function MyProfilePage() {
   const roleLabel =
     role === "owner" ? "Equipment Owner" : role === "admin" ? "Administrator" : "Customer"
 
+  const roleSubtitle =
+    role === "owner"
+      ? "Manage your owner presence, listings contact details, and account preferences."
+      : role === "admin"
+      ? "Manage administrative credentials, system contact info, and oversight profile."
+      : "Manage your personal contact details, delivery addresses, and rental preferences."
+
   return (
-    <OwnerRouteGuard>
+    <AuthRouteGuard>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">My Profile</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Manage your personal information, contact credentials, and owner presence.
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{roleSubtitle}</p>
           </div>
           <Button
             variant="outline"
@@ -269,7 +274,7 @@ export default function MyProfilePage() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between py-2">
-                    <span className="text-muted-foreground">Location</span>
+                    <span className="text-muted-foreground">Address</span>
                     <span className="max-w-[150px] truncate font-medium text-foreground">
                       {address || "Not set"}
                     </span>
@@ -285,29 +290,75 @@ export default function MyProfilePage() {
                 </div>
               </div>
 
-              {/* Owner Privileges Card */}
+              {/* Role-Specific Capabilities Card */}
               <div className="rounded-2xl border bg-card p-5 text-card-foreground shadow-xs">
                 <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   <Sparkles className="size-4 text-primary" />
-                  Owner Privileges
+                  {role === "owner"
+                    ? "Owner Privileges"
+                    : role === "admin"
+                    ? "Administrator Access"
+                    : "Customer Benefits"}
                 </div>
                 <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="size-3.5 text-emerald-500" />
-                    List unlimited equipment for rent
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="size-3.5 text-emerald-500" />
-                    Accept and manage rental bookings
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="size-3.5 text-emerald-500" />
-                    Receive payouts directly via Stripe
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="size-3.5 text-emerald-500" />
-                    Track rental analytics & earnings
-                  </li>
+                  {role === "owner" ? (
+                    <>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        List equipment for rental marketplace
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        Accept & manage customer rentals
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        Receive secure Stripe payouts
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        Track monthly rental revenue
+                      </li>
+                    </>
+                  ) : role === "admin" ? (
+                    <>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        Platform user & role management
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        Moderate & approve equipment listings
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        Monitor platform-wide bookings
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        Global business & revenue analytics
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        Browse verified equipment catalog
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        Book & rent with flexible duration
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        Secure Stripe payment processing
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+                        Save favorite items & track booking history
+                      </li>
+                    </>
+                  )}
                 </ul>
               </div>
             </div>
@@ -321,7 +372,7 @@ export default function MyProfilePage() {
                 <div>
                   <h2 className="text-lg font-bold tracking-tight">Edit Profile Information</h2>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Update your public profile and contact preferences below.
+                    Update your personal details, contact number, and address below.
                   </p>
                 </div>
 
@@ -423,7 +474,7 @@ export default function MyProfilePage() {
                       />
                     </div>
                     <p className="text-[11px] text-muted-foreground">
-                      Customers and renters will use this number for rental inquiries and pickups.
+                      Used for delivery notifications, pickup coordination, and booking receipts.
                     </p>
                   </div>
 
@@ -442,7 +493,7 @@ export default function MyProfilePage() {
                       />
                     </div>
                     <p className="text-[11px] text-muted-foreground">
-                      Your primary business address or location for equipment dispatch.
+                      Your primary address for equipment deliveries, pickups, and billing.
                     </p>
                   </div>
 
@@ -490,6 +541,6 @@ export default function MyProfilePage() {
           </div>
         )}
       </div>
-    </OwnerRouteGuard>
+    </AuthRouteGuard>
   )
 }
