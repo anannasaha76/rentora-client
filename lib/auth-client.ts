@@ -9,6 +9,12 @@ export const authClient = createAuthClient({
         role: {
           type: "string",
         },
+        phoneNumber: {
+          type: "string",
+        },
+        address: {
+          type: "string",
+        },
       },
     }),
   ],
