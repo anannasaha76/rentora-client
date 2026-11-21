@@ -7,7 +7,6 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
-  ExternalLink,
   Eye,
   Filter,
   Layers,
@@ -39,6 +38,37 @@ import {
   updateEquipment,
 } from "@/lib/equipment"
 import { cn } from "@/lib/utils"
+
+const defaultCategories = [
+  "Construction Equipment",
+  "Photography Equipment",
+  "Vehicles & Transportation",
+  "Agriculture Equipment",
+  "Electronics",
+  "Event Equipment",
+  "Excavators",
+  "Loaders",
+  "Cranes",
+  "Forklifts",
+  "Tractors",
+  "Generators",
+  "Power Tools",
+  "Other",
+]
+
+const defaultRentalTypes: RentalType[] = ["Daily", "Weekly", "Monthly"]
+
+const defaultConditions = [
+  "New",
+  "Excellent",
+  "Good",
+  "Fair",
+  "For parts",
+]
+
+const safeCategories = equipmentCategories && equipmentCategories.length > 0 ? equipmentCategories : defaultCategories
+const safeRentalTypes = rentalTypes && rentalTypes.length > 0 ? rentalTypes : defaultRentalTypes
+const safeConditions = equipmentConditions && equipmentConditions.length > 0 ? equipmentConditions : defaultConditions
 
 const inputClass =
   "flex h-9 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
@@ -92,7 +122,10 @@ export default function MyEquipmentPage() {
   const ownerId = session?.user?.id || ""
 
   const fetchEquipment = React.useCallback(async () => {
-    if (!ownerEmail && !ownerId) return
+    if (!ownerEmail && !ownerId) {
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setError(null)
     try {
@@ -110,6 +143,8 @@ export default function MyEquipmentPage() {
   React.useEffect(() => {
     if (ownerEmail || ownerId) {
       fetchEquipment()
+    } else {
+      setLoading(false)
     }
   }, [ownerEmail, ownerId, fetchEquipment])
 
@@ -135,7 +170,7 @@ export default function MyEquipmentPage() {
     setDeleting(true)
     try {
       await deleteEquipment(id)
-      setEquipmentList((prev) => prev.filter((item) => (item._id || item.id) !== id))
+      setEquipmentList((prev) => (prev || []).filter((item) => (item._id || item.id) !== id))
       toast.success("Equipment listing deleted successfully.")
       setDeleteItem(null)
     } catch (err) {
@@ -149,7 +184,7 @@ export default function MyEquipmentPage() {
   function handleUpdateSuccess(updated: EquipmentListing) {
     const id = updated._id || updated.id
     setEquipmentList((prev) =>
-      prev.map((item) => ((item._id || item.id) === id ? { ...item, ...updated } : item))
+      (prev || []).map((item) => ((item._id || item.id) === id ? { ...item, ...updated } : item))
     )
     setEditItem(null)
     toast.success("Equipment updated successfully.")
@@ -157,13 +192,21 @@ export default function MyEquipmentPage() {
 
   // Filtered list
   const filteredList = React.useMemo(() => {
+    if (!Array.isArray(equipmentList)) return []
     return equipmentList.filter((item) => {
+      if (!item) return false
+      const name = item.equipmentName || ""
+      const brand = item.brand || ""
+      const model = item.model || ""
+      const location = item.location || ""
+      const q = (searchQuery || "").toLowerCase()
+
       const matchesSearch =
-        searchQuery === "" ||
-        item.equipmentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.brand && item.brand.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (item.model && item.model.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (item.location && item.location.toLowerCase().includes(searchQuery.toLowerCase()))
+        q === "" ||
+        name.toLowerCase().includes(q) ||
+        brand.toLowerCase().includes(q) ||
+        model.toLowerCase().includes(q) ||
+        location.toLowerCase().includes(q)
 
       const matchesCategory =
         selectedCategory === "all" || item.category === selectedCategory
@@ -176,13 +219,14 @@ export default function MyEquipmentPage() {
   }, [equipmentList, searchQuery, selectedCategory, selectedStatus])
 
   // Quick stats
-  const totalCount = equipmentList.length
-  const pendingCount = equipmentList.filter(
-    (item) => (item.status || "Pending") === "Pending"
+  const safeList = Array.isArray(equipmentList) ? equipmentList : []
+  const totalCount = safeList.length
+  const pendingCount = safeList.filter(
+    (item) => (item?.status || "Pending") === "Pending"
   ).length
-  const approvedCount = equipmentList.filter((item) => item.status === "Approved").length
-  const totalUnits = equipmentList.reduce(
-    (sum, item) => sum + (Number(item.availableQuantity) || 0),
+  const approvedCount = safeList.filter((item) => item?.status === "Approved").length
+  const totalUnits = safeList.reduce(
+    (sum, item) => sum + (Number(item?.availableQuantity) || 0),
     0
   )
 
@@ -285,7 +329,7 @@ export default function MyEquipmentPage() {
               className={cn(inputClass, "h-9 w-auto text-xs")}
             >
               <option value="all">All Categories</option>
-              {equipmentCategories.map((cat) => (
+              {(safeCategories || []).map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
                 </option>
@@ -400,7 +444,7 @@ export default function MyEquipmentPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {filteredList.map((item) => {
+                  {(filteredList || []).map((item) => {
                     const id = item._id || item.id || ""
                     return (
                       <tr
@@ -806,6 +850,7 @@ function UpdateEquipmentModal({
     }
     if (!form.category) {
       toast.error("Please select a category.")
+      return
     }
     if (Number(form.rentalPrice) <= 0) {
       toast.error("Rental price must be greater than zero.")
@@ -897,7 +942,7 @@ function UpdateEquipmentModal({
                   required
                 >
                   <option value="">Select category</option>
-                  {equipmentCategories.map((cat) => (
+                  {(safeCategories || []).map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
                     </option>
@@ -943,7 +988,7 @@ function UpdateEquipmentModal({
                   className={inputClass}
                   required
                 >
-                  {rentalTypes.map((type) => (
+                  {(safeRentalTypes || []).map((type) => (
                     <option key={type} value={type}>
                       {type}
                     </option>
@@ -977,7 +1022,7 @@ function UpdateEquipmentModal({
                   required
                 >
                   <option value="">Select condition</option>
-                  {equipmentConditions.map((cond) => (
+                  {(safeConditions || []).map((cond) => (
                     <option key={cond} value={cond}>
                       {cond}
                     </option>
@@ -1172,4 +1217,3 @@ function DeleteConfirmModal({
     </div>
   )
 }
-
