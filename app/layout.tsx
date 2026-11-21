@@ -5,9 +5,10 @@ import "react-toastify/dist/ReactToastify.css"
 import { ToastContainer } from "react-toastify"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Navbar } from "@/components/navbar"
+import { Footer } from "@/components/footer"
 import { cn } from "@/lib/utils"
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'})
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
@@ -25,10 +26,11 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
     >
-      <body>
+      <body className="flex min-h-screen flex-col bg-background text-foreground">
         <ThemeProvider>
           <Navbar />
-          {children}
+          <main className="flex-1">{children}</main>
+          <Footer />
           <ToastContainer position="top-right" />
         </ThemeProvider>
       </body>
