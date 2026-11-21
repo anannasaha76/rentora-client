@@ -213,7 +213,7 @@ function PaymentSuccessContent() {
               <div className="flex justify-between border-t pt-3 text-sm font-bold">
                 <span className="text-foreground">Total Amount Paid:</span>
                 <span className="text-primary text-base">
-                  ${parseFloat(bookingData.totalAmount || "0").toFixed(2)}
+                  ৳{parseFloat(bookingData.totalAmount || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} BDT
                 </span>
               </div>
             </div>

@@ -814,12 +814,12 @@ export default function EquipmentDetailsPage() {
                   <div className="flex justify-between py-1">
                     <span className="text-muted-foreground">Rate & Quantity</span>
                     <span className="font-medium text-foreground">
-                      ${equipment.rentalPrice} × {requiredQuantity} unit{requiredQuantity > 1 ? "s" : ""}
+                      ৳{equipment.rentalPrice.toLocaleString()} × {requiredQuantity} unit{requiredQuantity > 1 ? "s" : ""}
                     </span>
                   </div>
                   <div className="mt-2 flex items-baseline justify-between border-t pt-2 text-sm font-bold">
                     <span className="text-foreground">Total Rental Amount</span>
-                    <span className="text-lg text-primary">${pricing.total.toFixed(2)}</span>
+                    <span className="text-lg text-primary">৳{pricing.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} BDT</span>
                   </div>
                 </div>
 

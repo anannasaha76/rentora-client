@@ -66,6 +66,10 @@ export const equipmentConditions = [
   "For parts",
 ] as const
 
+export const defaultCategories = equipmentCategories
+export const defaultConditions = equipmentConditions
+export const defaultRentalTypes = rentalTypes
+
 export const equipmentApiUrl =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 
@@ -204,3 +208,22 @@ export async function getAllEquipment(
   }
   return data
 }
+
+export async function updateEquipmentStatus(
+  id: string,
+  status: EquipmentStatus
+): Promise<{ message: string; equipment: EquipmentListing }> {
+  const res = await fetch(`${equipmentApiUrl}/api/equipment/${id}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  })
+
+  const data = await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new Error(data?.message || "Failed to update equipment status.")
+  }
+
+  return data
+}
+

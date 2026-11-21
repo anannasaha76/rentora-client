@@ -39,6 +39,7 @@ export async function POST(req: Request) {
     }
 
     const unitAmountCents = Math.round(Number(totalAmount) * 100)
+    const currency = String(body.currency || "bdt").toLowerCase()
 
     const metadata: Record<string, string> = {
       equipmentId: String(equipmentId),
@@ -62,6 +63,7 @@ export async function POST(req: Request) {
       totalAmount: String(totalAmount),
       rentalPrice: String(rentalPrice || 0),
       rentalType: String(rentalType),
+      currency: currency,
     }
 
     // Try creating live Stripe Checkout session
@@ -72,7 +74,7 @@ export async function POST(req: Request) {
           line_items: [
             {
               price_data: {
-                currency: "usd",
+                currency: currency, // Bangladeshi Taka (bdt)
                 unit_amount: unitAmountCents,
                 product_data: {
                   name: equipmentName,

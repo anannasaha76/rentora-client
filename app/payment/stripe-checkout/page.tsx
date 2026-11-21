@@ -67,6 +67,8 @@ function StripeCheckoutContent() {
   }
 
   const totalAmount = parseFloat(metadata.totalAmount || "0")
+  const isBDT = (metadata.currency || "bdt").toLowerCase() === "bdt"
+  const currencySymbol = isBDT ? "৳" : "$"
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-[#3c4257] antialiased">
@@ -84,10 +86,10 @@ function StripeCheckoutContent() {
 
             <div className="mt-8">
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Rentora Marketplace
+                Rentora Marketplace ({isBDT ? "BDT" : "USD"})
               </span>
               <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-[#1a1f36]">
-                ${totalAmount.toFixed(2)}
+                {currencySymbol}{totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h1>
             </div>
 
@@ -114,7 +116,7 @@ function StripeCheckoutContent() {
                     Qty: {metadata.quantity || 1} • {metadata.durationDays || 1} day(s)
                   </p>
                   <p className="mt-1 text-xs font-medium text-emerald-600">
-                    ${metadata.rentalPrice || 0} / {(metadata.rentalType || "Daily").toLowerCase()}
+                    {currencySymbol}{metadata.rentalPrice || 0} / {(metadata.rentalType || "Daily").toLowerCase()}
                   </p>
                 </div>
               </div>
@@ -235,15 +237,15 @@ function StripeCheckoutContent() {
 
               {/* Submit Pay Button */}
               <div className="pt-3">
-                <Button
-                  type="submit"
-                  size="lg"
-                  disabled={isProcessing}
-                  className="w-full bg-[#635bff] font-bold text-white shadow-md hover:bg-[#5340eb]"
-                >
-                  <Lock className="mr-1.5 size-4" />
-                  {isProcessing ? "Processing..." : `Pay $${totalAmount.toFixed(2)}`}
-                </Button>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={isProcessing}
+                    className="w-full bg-[#635bff] font-bold text-white shadow-md hover:bg-[#5340eb]"
+                  >
+                    <Lock className="mr-1.5 size-4" />
+                    {isProcessing ? "Processing..." : `Pay ${currencySymbol}${totalAmount.toFixed(2)}`}
+                  </Button>
               </div>
             </form>
           </div>
