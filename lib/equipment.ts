@@ -140,3 +140,67 @@ export async function deleteEquipment(
 
   return data
 }
+
+export type EquipmentQueryOptions = {
+  search?: string
+  name?: string
+  location?: string
+  category?: string
+  rentalType?: string
+  minPrice?: number | string
+  maxPrice?: number | string
+  availability?: string
+  sort?: string
+  status?: string
+  page?: number
+  limit?: number
+}
+
+export type EquipmentResponse = {
+  equipment: EquipmentListing[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
+export async function getAllEquipment(
+  options: EquipmentQueryOptions = {}
+): Promise<EquipmentResponse> {
+  const params = new URLSearchParams()
+  if (options.search) params.set("search", options.search)
+  if (options.name) params.set("name", options.name)
+  if (options.location) params.set("location", options.location)
+  if (options.category && options.category !== "all") params.set("category", options.category)
+  if (options.rentalType && options.rentalType !== "all") params.set("rentalType", options.rentalType)
+  if (options.minPrice !== undefined && options.minPrice !== "") params.set("minPrice", String(options.minPrice))
+  if (options.maxPrice !== undefined && options.maxPrice !== "") params.set("maxPrice", String(options.maxPrice))
+  if (options.availability && options.availability !== "all") params.set("availability", options.availability)
+  if (options.sort) params.set("sort", options.sort)
+  if (options.status) params.set("status", options.status)
+  if (options.page) params.set("page", String(options.page))
+  if (options.limit) params.set("limit", String(options.limit))
+
+  const res = await fetch(`${equipmentApiUrl}/api/equipment?${params.toString()}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+  })
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null)
+    throw new Error(errorData?.message || "Failed to load equipment.")
+  }
+
+  const data = await res.json()
+  if (Array.isArray(data)) {
+    return {
+      equipment: data,
+      total: data.length,
+      page: 1,
+      limit: data.length,
+      totalPages: 1,
+    }
+  }
+  return data
+}
