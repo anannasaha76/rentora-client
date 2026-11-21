@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
+  Heart,
   Layers,
   MapPin,
   Package,
@@ -32,6 +33,11 @@ import {
   getAllEquipment,
   rentalTypes,
 } from "@/lib/equipment"
+import {
+  addFavorite,
+  getCustomerFavorites,
+  removeFavoriteByEquipment,
+} from "@/lib/favorite"
 import { cn } from "@/lib/utils"
 
 const defaultCategories = [
@@ -165,6 +171,75 @@ export default function AllEquipmentPage() {
       router.push(`/login?callbackUrl=/equipment/${id}`)
     } else {
       router.push(`/equipment/${id}`)
+    }
+  }
+
+  // Favorite IDs set
+  const [favoriteIds, setFavoriteIds] = React.useState<Set<string>>(new Set())
+
+  // Fetch customer favorites if logged in
+  React.useEffect(() => {
+    if (session?.user?.email) {
+      getCustomerFavorites(session.user.email)
+        .then((items) => {
+          const ids = new Set(items.map((i) => i.equipmentId))
+          setFavoriteIds(ids)
+        })
+        .catch(() => {})
+    } else {
+      setFavoriteIds(new Set())
+    }
+  }, [session?.user?.email])
+
+  // Handle Quick Favorite Toggle on Card
+  async function handleToggleFavoriteCard(item: EquipmentListing, e: React.MouseEvent) {
+    e.stopPropagation()
+    if (!session?.user?.email) {
+      toast.info("Please log in to add items to your favorites.")
+      router.push(`/login?callbackUrl=/equipment`)
+      return
+    }
+
+    const itemId = item._id || item.id || ""
+    const isFav = favoriteIds.has(itemId)
+
+    try {
+      if (isFav) {
+        await removeFavoriteByEquipment(session.user.email, itemId)
+        setFavoriteIds((prev) => {
+          const next = new Set(prev)
+          next.delete(itemId)
+          return next
+        })
+        toast.success("Removed from favorites")
+      } else {
+        await addFavorite({
+          userEmail: session.user.email,
+          userId: session.user.id,
+          equipmentId: itemId,
+          equipmentName: item.equipmentName,
+          category: item.category,
+          rentalPrice: item.rentalPrice,
+          rentalType: item.rentalType,
+          location: item.location,
+          availableQuantity: item.availableQuantity,
+          image: item.image,
+          brand: item.brand,
+          model: item.model,
+          description: item.description,
+          ownerName: item.ownerName,
+          ownerEmail: item.ownerEmail,
+        })
+        setFavoriteIds((prev) => {
+          const next = new Set(prev)
+          next.add(itemId)
+          return next
+        })
+        toast.success("Added to favorites!")
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to update favorites"
+      toast.error(msg)
     }
   }
 
@@ -561,19 +636,36 @@ export default function AllEquipmentPage() {
                         </span>
                       </div>
 
-                      {/* Availability Status Badge (Top-Right) */}
-                      <div className="absolute right-3 top-3">
+                      {/* Top-Right Badges: Availability Status & Favorite Toggle */}
+                      <div className="absolute right-3 top-3 flex items-center gap-1.5 z-10">
                         {isAvailable ? (
-                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-white shadow-xs backdrop-blur-xs">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/90 px-2 py-1 text-[11px] font-semibold text-white shadow-xs backdrop-blur-xs">
                             <CheckCircle2 className="size-3" />
                             In Stock
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-md bg-destructive/90 px-2.5 py-1 text-xs font-semibold text-white shadow-xs backdrop-blur-xs">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-destructive/90 px-2 py-1 text-[11px] font-semibold text-white shadow-xs backdrop-blur-xs">
                             <XCircle className="size-3" />
                             Out of Stock
                           </span>
                         )}
+
+                        {/* Favorite Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleToggleFavoriteCard(item, e)}
+                          className="flex size-7 items-center justify-center rounded-full bg-background/90 p-1 shadow-xs backdrop-blur-xs transition hover:bg-background hover:scale-105"
+                          aria-label={favoriteIds.has(id) ? "Remove from favorites" : "Add to favorites"}
+                        >
+                          <Heart
+                            className={cn(
+                              "size-3.5 transition-colors",
+                              favoriteIds.has(id)
+                                ? "fill-rose-500 text-rose-500"
+                                : "text-muted-foreground hover:text-rose-500"
+                            )}
+                          />
+                        </button>
                       </div>
                     </div>
 

@@ -111,3 +111,114 @@ export async function updateRentalStatus(
   return data
 }
 
+export type CreateBookingPayload = {
+  customerId?: string
+  customerName: string
+  customerEmail: string
+  customerPhone?: string
+  deliveryAddress?: string
+  additionalNotes?: string
+  equipmentId: string
+  equipmentName: string
+  equipmentImage?: string
+  equipmentCategory?: string
+  location?: string
+  ownerId?: string
+  ownerName?: string
+  ownerEmail?: string
+  startDate: string
+  endDate: string
+  durationDays?: number
+  requiredQuantity: number
+  rentalPrice?: number
+  rentalType?: string
+  totalAmount: number
+  paymentStatus?: PaymentStatus
+  bookingStatus?: BookingStatus
+}
+
+export async function createRentalBooking(
+  payload: CreateBookingPayload
+): Promise<{ message: string; id: string; booking: RentalBooking }> {
+  const res = await fetch(`${equipmentApiUrl}/api/rentals`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+
+  const data = await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new Error(data?.message || "Failed to create rental booking.")
+  }
+
+  return data
+}
+
+export async function getRentalById(id: string): Promise<RentalBooking> {
+  const res = await fetch(`${equipmentApiUrl}/api/rentals/${id}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+  })
+
+  const data = await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new Error(data?.message || "Failed to load rental booking details.")
+  }
+
+  return data
+}
+
+export type PaymentRecord = {
+  _id?: string
+  id?: string
+  bookingId: string
+  equipmentId: string
+  equipmentName: string
+  customerEmail: string
+  customerName: string
+  ownerEmail?: string
+  totalAmount: number
+  paymentMethod: string
+  transactionId: string
+  status: string
+  createdAt: string
+}
+
+export async function processPayment(payload: {
+  bookingId: string
+  totalAmount?: number
+  paymentMethod?: string
+  transactionId?: string
+}): Promise<{ message: string; payment: PaymentRecord; booking: RentalBooking }> {
+  const res = await fetch(`${equipmentApiUrl}/api/payments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+
+  const data = await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new Error(data?.message || "Payment processing failed.")
+  }
+
+  return data
+}
+
+export async function getPaymentById(id: string): Promise<PaymentRecord> {
+  const res = await fetch(`${equipmentApiUrl}/api/payments/${id}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+  })
+
+  const data = await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new Error(data?.message || "Failed to fetch payment details.")
+  }
+
+  return data
+}
+
+
+

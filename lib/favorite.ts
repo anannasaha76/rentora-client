@@ -39,6 +39,26 @@ export async function getCustomerFavorites(
   return res.json()
 }
 
+export async function checkFavoriteStatus(
+  email: string,
+  equipmentId: string
+): Promise<{ isFavorite: boolean; favoriteId?: string | null }> {
+  const res = await fetch(
+    `${apiUrl}/api/favorites/check/${encodeURIComponent(email)}/${encodeURIComponent(equipmentId)}`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    }
+  )
+
+  if (!res.ok) {
+    return { isFavorite: false, favoriteId: null }
+  }
+
+  return res.json()
+}
+
 export async function addFavorite(
   item: Partial<FavoriteItem>
 ): Promise<{ message: string; favorite: FavoriteItem }> {

@@ -659,7 +659,7 @@ function FavoriteDetailsModal({
               Close
             </Button>
             <Link
-              href="/equipment"
+              href={`/equipment/${item.equipmentId}`}
               className={cn(buttonVariants({ variant: "default", size: "sm" }))}
             >
               Rent Equipment
