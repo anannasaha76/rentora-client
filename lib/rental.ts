@@ -220,5 +220,86 @@ export async function getPaymentById(id: string): Promise<PaymentRecord> {
   return data
 }
 
+export type RentalStats = {
+  totalRentals: number
+  totalRevenue: number
+  pendingCount: number
+  confirmedCount: number
+  inProgressCount: number
+  completedCount: number
+  cancelledCount: number
+  paidCount: number
+  unpaidCount: number
+}
+
+export async function getAllRentals(options?: {
+  search?: string
+  bookingStatus?: string
+  paymentStatus?: string
+}): Promise<{ rentals: RentalBooking[]; stats?: RentalStats }> {
+  const query = new URLSearchParams()
+  if (options?.search) query.set("search", options.search)
+  if (options?.bookingStatus && options.bookingStatus !== "all") {
+    query.set("bookingStatus", options.bookingStatus)
+  }
+  if (options?.paymentStatus && options.paymentStatus !== "all") {
+    query.set("paymentStatus", options.paymentStatus)
+  }
+
+  const queryString = query.toString() ? `?${query.toString()}` : ""
+  const res = await fetch(`${equipmentApiUrl}/api/rentals${queryString}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+  })
+
+  const data = await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new Error(data?.message || "Failed to fetch rental records.")
+  }
+
+  if (Array.isArray(data)) {
+    return { rentals: data }
+  }
+
+  return {
+    rentals: Array.isArray(data?.rentals) ? data.rentals : [],
+    stats: data?.stats,
+  }
+}
+
+export async function manageRental(
+  id: string,
+  updates: Partial<RentalBooking>
+): Promise<{ message: string; rental: RentalBooking }> {
+  const res = await fetch(`${equipmentApiUrl}/api/rentals/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updates),
+  })
+
+  const data = await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new Error(data?.message || "Failed to update rental details.")
+  }
+
+  return data
+}
+
+export async function deleteRental(id: string): Promise<{ message: string }> {
+  const res = await fetch(`${equipmentApiUrl}/api/rentals/${id}`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+  })
+
+  const data = await res.json().catch(() => null)
+  if (!res.ok) {
+    throw new Error(data?.message || "Failed to delete rental booking.")
+  }
+
+  return data
+}
+
+
 
 
