@@ -3,9 +3,11 @@
  * Handles access token storage, retrieval, generation and authorization headers
  */
 
+import { backendApiUrl } from "@/lib/api"
+
 export const JWT_STORAGE_KEY = "rentora_access_token";
 
-const serverApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const serverApiUrl = backendApiUrl;
 
 export interface JwtUserPayload {
   id: string;

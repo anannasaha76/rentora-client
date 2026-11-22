@@ -1,8 +1,16 @@
 import { createAuthClient } from "better-auth/react"
 import { inferAdditionalFields, jwtClient } from "better-auth/client/plugins"
 
+const baseURL =
+  process.env.NEXT_PUBLIC_BETTER_AUTH_URL ||
+  (typeof window !== "undefined" ? window.location.origin : undefined)
+
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+  baseURL,
+  sessionOptions: {
+    refetchInterval: 0,
+    refetchOnWindowFocus: false,
+  },
   plugins: [
     inferAdditionalFields({
       user: {

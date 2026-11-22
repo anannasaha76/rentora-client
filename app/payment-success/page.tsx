@@ -16,6 +16,7 @@ import {
 
 import { AuthRouteGuard } from "@/components/auth-route-guard"
 import { Button } from "@/components/ui/button"
+import { backendApiUrl } from "@/lib/api"
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams()
@@ -70,7 +71,7 @@ function PaymentSuccessContent() {
       const txId = stripeTxId || metadata.transactionId || `pi_${sessionId.replace(/[^a-zA-Z0-9]/g, "").slice(-16)}`
       setTransactionId(txId)
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+      const apiUrl = backendApiUrl
 
       // Call Express API POST /api/bookings to record booking & payment
       const res = await fetch(`${apiUrl}/api/bookings`, {

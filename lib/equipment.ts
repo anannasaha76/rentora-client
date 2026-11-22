@@ -1,4 +1,5 @@
 import { ensureAccessToken, getAuthHeader } from "@/lib/jwt"
+import { backendApiUrl } from "@/lib/api"
 
 export type RentalType = "Daily" | "Weekly" | "Monthly"
 export type EquipmentStatus = "Pending" | "Approved" | "Rejected"
@@ -72,8 +73,7 @@ export const defaultCategories = equipmentCategories
 export const defaultConditions = equipmentConditions
 export const defaultRentalTypes = rentalTypes
 
-export const equipmentApiUrl =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+export const equipmentApiUrl = backendApiUrl
 
 export async function getOwnerEquipment(
   ownerEmail: string,

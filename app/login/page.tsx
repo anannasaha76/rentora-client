@@ -79,7 +79,6 @@ export default function LoginPage() {
       toast.success("Welcome back to Rentora!")
 
       router.push(getCallbackUrl())
-      router.refresh()
     } catch {
       toast.error("Login failed. Please try again.")
     } finally {

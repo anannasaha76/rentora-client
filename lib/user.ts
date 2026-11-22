@@ -1,4 +1,5 @@
 import { getAuthHeader } from "@/lib/jwt"
+import { backendApiUrl } from "@/lib/api"
 
 export type UserProfile = {
   id?: string
@@ -14,8 +15,7 @@ export type UserProfile = {
   emailVerified?: boolean
 }
 
-export const apiUrl =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+export const apiUrl = backendApiUrl
 
 export async function getUserProfile(email: string): Promise<UserProfile> {
   const res = await fetch(

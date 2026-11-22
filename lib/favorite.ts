@@ -1,3 +1,5 @@
+import { backendApiUrl } from "@/lib/api"
+
 export type FavoriteItem = {
   _id: string
   id?: string
@@ -19,8 +21,7 @@ export type FavoriteItem = {
   createdAt: string
 }
 
-export const apiUrl =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+export const apiUrl = backendApiUrl
 
 export async function getCustomerFavorites(
   email: string

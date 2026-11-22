@@ -4,7 +4,11 @@ import { stripe } from "@/lib/stripe"
 
 export async function POST(req: Request) {
   try {
-    const origin = (await headers()).get("origin") || "http://localhost:3000"
+    const origin =
+      (await headers()).get("origin") ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.BETTER_AUTH_URL ||
+      "http://localhost:3000"
     const body = await req.json()
 
     const {

@@ -58,7 +58,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     await signOut()
     setMobileOpen(false)
     router.push("/")
-    router.refresh()
   }
 
   const role = session?.user?.role || "customer"
