@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   Clock,
   DollarSign,
-  Edit3,
   ExternalLink,
   Eye,
   Filter,
@@ -27,7 +26,6 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
-  Trash2,
   User,
   X,
 } from "lucide-react"
@@ -36,10 +34,7 @@ import { toast } from "react-toastify"
 import { AuthRouteGuard } from "@/components/auth-route-guard"
 import { Button } from "@/components/ui/button"
 import {
-  deleteRental,
   getAllRentals,
-  manageRental,
-  updateRentalStatus,
   type BookingStatus,
   type PaymentStatus,
   type RentalBooking,
@@ -78,30 +73,8 @@ export default function AdminAllRentalsPage() {
   const [bookingStatusFilter, setBookingStatusFilter] = React.useState<string>("all")
   const [paymentStatusFilter, setPaymentStatusFilter] = React.useState<string>("all")
 
-  // Inline status update trackers
-  const [updatingStatusId, setUpdatingStatusId] = React.useState<string | null>(null)
-
   // Modals state
   const [viewingRental, setViewingRental] = React.useState<RentalBooking | null>(null)
-  const [editingRental, setEditingRental] = React.useState<RentalBooking | null>(null)
-  const [deletingRental, setDeletingRental] = React.useState<RentalBooking | null>(null)
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
-
-  // Edit form state
-  const [editForm, setEditForm] = React.useState({
-    customerName: "",
-    customerEmail: "",
-    customerPhone: "",
-    deliveryAddress: "",
-    additionalNotes: "",
-    startDate: "",
-    endDate: "",
-    durationDays: 1,
-    requiredQuantity: 1,
-    totalAmount: 0,
-    bookingStatus: "Pending" as BookingStatus,
-    paymentStatus: "Pending" as PaymentStatus,
-  })
 
   // Load rentals from backend
   const loadRentals = React.useCallback(async () => {
@@ -129,121 +102,6 @@ export default function AdminAllRentalsPage() {
   React.useEffect(() => {
     loadRentals()
   }, [loadRentals])
-
-  // Quick Booking Status Change Handler
-  const handleQuickBookingStatusChange = async (rental: RentalBooking, newStatus: BookingStatus) => {
-    const id = rental._id || rental.id
-    if (!id || rental.bookingStatus === newStatus) return
-
-    try {
-      setUpdatingStatusId(id)
-      await updateRentalStatus(id, { bookingStatus: newStatus })
-      setRentals((prev) =>
-        prev.map((r) => ((r._id || r.id) === id ? { ...r, bookingStatus: newStatus } : r))
-      )
-      toast.success(`Booking status changed to "${newStatus}"`)
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to update booking status."
-      toast.error(msg)
-    } finally {
-      setUpdatingStatusId(null)
-    }
-  }
-
-  // Quick Payment Status Change Handler
-  const handleQuickPaymentStatusChange = async (rental: RentalBooking, newStatus: PaymentStatus) => {
-    const id = rental._id || rental.id
-    if (!id || rental.paymentStatus === newStatus) return
-
-    try {
-      setUpdatingStatusId(id)
-      await updateRentalStatus(id, { paymentStatus: newStatus })
-      setRentals((prev) =>
-        prev.map((r) => ((r._id || r.id) === id ? { ...r, paymentStatus: newStatus } : r))
-      )
-      toast.success(`Payment status changed to "${newStatus}"`)
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to update payment status."
-      toast.error(msg)
-    } finally {
-      setUpdatingStatusId(null)
-    }
-  }
-
-  // Open Edit Modal
-  const openEditModal = (rental: RentalBooking) => {
-    setEditingRental(rental)
-    setEditForm({
-      customerName: rental.customerName || "",
-      customerEmail: rental.customerEmail || "",
-      customerPhone: rental.customerPhone || "",
-      deliveryAddress: rental.deliveryAddress || "",
-      additionalNotes: rental.additionalNotes || "",
-      startDate: rental.startDate || "",
-      endDate: rental.endDate || "",
-      durationDays: rental.durationDays || 1,
-      requiredQuantity: rental.requiredQuantity || 1,
-      totalAmount: rental.totalAmount || 0,
-      bookingStatus: (rental.bookingStatus || "Pending") as BookingStatus,
-      paymentStatus: (rental.paymentStatus || "Pending") as PaymentStatus,
-    })
-  }
-
-  // Submit Edit Form
-  const handleSaveEdit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!editingRental) return
-    const id = editingRental._id || editingRental.id
-    if (!id) return
-
-    try {
-      setIsSubmitting(true)
-      const res = await manageRental(id, {
-        customerName: editForm.customerName.trim(),
-        customerPhone: editForm.customerPhone.trim(),
-        deliveryAddress: editForm.deliveryAddress.trim(),
-        additionalNotes: editForm.additionalNotes.trim(),
-        startDate: editForm.startDate,
-        endDate: editForm.endDate,
-        durationDays: Number(editForm.durationDays) || 1,
-        requiredQuantity: Number(editForm.requiredQuantity) || 1,
-        totalAmount: Number(editForm.totalAmount) || 0,
-        bookingStatus: editForm.bookingStatus,
-        paymentStatus: editForm.paymentStatus,
-      })
-
-      setRentals((prev) =>
-        prev.map((r) => ((r._id || r.id) === id ? { ...r, ...res.rental } : r))
-      )
-      toast.success(res.message || "Rental record updated successfully.")
-      setEditingRental(null)
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to update rental record."
-      toast.error(msg)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  // Delete Rental Handler
-  const handleDeleteRental = async () => {
-    if (!deletingRental) return
-    const id = deletingRental._id || deletingRental.id
-    if (!id) return
-
-    try {
-      setIsSubmitting(true)
-      const res = await deleteRental(id)
-      setRentals((prev) => prev.filter((r) => (r._id || r.id) !== id))
-      toast.success(res.message || "Rental record removed successfully.")
-      setDeletingRental(null)
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to delete rental record."
-      toast.error(msg)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
 
   // Badges styling
   const getBookingStatusBadge = (status?: string) => {
@@ -560,7 +418,6 @@ export default function AdminAllRentalsPage() {
                 ) : (
                   rentals.map((rental) => {
                     const id = rental._id || rental.id || ""
-                    const isUpdatingThis = updatingStatusId === id
 
                     return (
                       <tr
@@ -680,103 +537,43 @@ export default function AdminAllRentalsPage() {
                           </div>
                         </td>
 
-                        {/* Payment Status with quick dropdown */}
+                        {/* Payment Status (View Only) */}
                         <td className="px-4 py-3.5 align-top">
-                          <div className="flex flex-col gap-1.5">
-                            <span
-                              className={cn(
-                                "inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
-                                getPaymentStatusBadge(rental.paymentStatus)
-                              )}
-                            >
-                              {rental.paymentStatus || "Pending"}
-                            </span>
-                            <select
-                              disabled={isUpdatingThis}
-                              value={rental.paymentStatus || "Pending"}
-                              onChange={(e) =>
-                                handleQuickPaymentStatusChange(
-                                  rental,
-                                  e.target.value as PaymentStatus
-                                )
-                              }
-                              aria-label={`Change payment status for ${rental.equipmentName}`}
-                              className="w-28 rounded border border-border/80 bg-background/80 px-1.5 py-0.5 text-xs text-foreground focus:border-primary focus:outline-hidden disabled:opacity-50"
-                            >
-                              <option value="Paid">Paid</option>
-                              <option value="Pending">Pending</option>
-                              <option value="Unpaid">Unpaid</option>
-                              <option value="Refunded">Refunded</option>
-                            </select>
-                          </div>
+                          <span
+                            className={cn(
+                              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
+                              getPaymentStatusBadge(rental.paymentStatus)
+                            )}
+                          >
+                            {rental.paymentStatus || "Pending"}
+                          </span>
                         </td>
 
-                        {/* Booking Status with quick dropdown */}
+                        {/* Booking Status (View Only) */}
                         <td className="px-4 py-3.5 align-top">
-                          <div className="flex flex-col gap-1.5">
-                            <span
-                              className={cn(
-                                "inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
-                                getBookingStatusBadge(rental.bookingStatus)
-                              )}
-                            >
-                              {rental.bookingStatus || "Pending"}
-                            </span>
-                            <select
-                              disabled={isUpdatingThis}
-                              value={rental.bookingStatus || "Pending"}
-                              onChange={(e) =>
-                                handleQuickBookingStatusChange(
-                                  rental,
-                                  e.target.value as BookingStatus
-                                )
-                              }
-                              aria-label={`Change booking status for ${rental.equipmentName}`}
-                              className="w-28 rounded border border-border/80 bg-background/80 px-1.5 py-0.5 text-xs text-foreground focus:border-primary focus:outline-hidden disabled:opacity-50"
-                            >
-                              <option value="Pending">Pending</option>
-                              <option value="Confirmed">Confirmed</option>
-                              <option value="In Progress">In Progress</option>
-                              <option value="Completed">Completed</option>
-                              <option value="Cancelled">Cancelled</option>
-                            </select>
-                          </div>
+                          <span
+                            className={cn(
+                              "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold",
+                              getBookingStatusBadge(rental.bookingStatus)
+                            )}
+                          >
+                            {rental.bookingStatus || "Pending"}
+                          </span>
                         </td>
 
-                        {/* Actions */}
+                        {/* Actions: View Details Only */}
                         <td className="px-4 py-3.5 align-top text-right">
-                          <div className="flex items-center justify-end gap-1">
+                          <div className="flex items-center justify-end">
                             {/* View Full Details */}
                             <Button
-                              variant="ghost"
-                              size="icon"
+                              variant="outline"
+                              size="xs"
                               onClick={() => setViewingRental(rental)}
                               title="View full booking receipt & details"
-                              className="size-8 text-muted-foreground hover:text-foreground"
+                              className="h-8 gap-1.5 font-medium"
                             >
-                              <Eye className="size-4" />
-                            </Button>
-
-                            {/* Edit / Manage Booking */}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openEditModal(rental)}
-                              title="Manage & edit rental record"
-                              className="size-8 text-muted-foreground hover:text-foreground"
-                            >
-                              <Edit3 className="size-4" />
-                            </Button>
-
-                            {/* Delete Booking */}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => setDeletingRental(rental)}
-                              title="Delete rental booking"
-                              className="size-8 text-muted-foreground hover:text-destructive"
-                            >
-                              <Trash2 className="size-4" />
+                              <Eye className="size-3.5" />
+                              <span>View</span>
                             </Button>
                           </div>
                         </td>
@@ -999,280 +796,6 @@ export default function AdminAllRentalsPage() {
                 </Button>
                 <Button onClick={() => setViewingRental(null)}>
                   Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* =========================================================================
-            MODAL 2: MANAGE / EDIT RENTAL MODAL
-            ========================================================================= */}
-        {editingRental && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-            <div className="relative max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-border bg-card p-6 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-border/80 pb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="rounded-xl bg-primary/10 p-2 text-primary">
-                    <Edit3 className="size-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-foreground">
-                      Manage Rental Booking
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Equipment: {editingRental.equipmentName}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setEditingRental(null)}
-                  className="size-8 rounded-full"
-                >
-                  <X className="size-4" />
-                </Button>
-              </div>
-
-              <form onSubmit={handleSaveEdit} className="mt-5 space-y-4">
-                {/* Status Controls */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="text-xs font-medium text-foreground">
-                      Booking Status
-                    </label>
-                    <select
-                      value={editForm.bookingStatus}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, bookingStatus: e.target.value as BookingStatus })
-                      }
-                      className="mt-1 w-full rounded-lg border border-border/80 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-hidden"
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="Confirmed">Confirmed</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Cancelled">Cancelled</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-foreground">
-                      Payment Status
-                    </label>
-                    <select
-                      value={editForm.paymentStatus}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, paymentStatus: e.target.value as PaymentStatus })
-                      }
-                      className="mt-1 w-full rounded-lg border border-border/80 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-hidden"
-                    >
-                      <option value="Paid">Paid</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Unpaid">Unpaid</option>
-                      <option value="Refunded">Refunded</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Dates & Quantities */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <div>
-                    <label className="text-xs font-medium text-foreground">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      value={editForm.startDate ? editForm.startDate.slice(0, 10) : ""}
-                      onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })}
-                      className="mt-1 w-full rounded-lg border border-border/80 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-hidden"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-foreground">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      value={editForm.endDate ? editForm.endDate.slice(0, 10) : ""}
-                      onChange={(e) => setEditForm({ ...editForm, endDate: e.target.value })}
-                      className="mt-1 w-full rounded-lg border border-border/80 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-hidden"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-foreground">
-                      Duration (Days)
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      value={editForm.durationDays}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, durationDays: Number(e.target.value) || 1 })
-                      }
-                      className="mt-1 w-full rounded-lg border border-border/80 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-hidden"
-                    />
-                  </div>
-                </div>
-
-                {/* Financials & Quantity */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="text-xs font-medium text-foreground">
-                      Required Quantity
-                    </label>
-                    <input
-                      type="number"
-                      min={1}
-                      value={editForm.requiredQuantity}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, requiredQuantity: Number(e.target.value) || 1 })
-                      }
-                      className="mt-1 w-full rounded-lg border border-border/80 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-hidden"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-foreground">
-                      Total Booking Amount (৳ BDT)
-                    </label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={editForm.totalAmount}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, totalAmount: Number(e.target.value) || 0 })
-                      }
-                      className="mt-1 w-full rounded-lg border border-border/80 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-hidden"
-                    />
-                  </div>
-                </div>
-
-                {/* Customer Contact */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="text-xs font-medium text-foreground">
-                      Customer Name
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.customerName}
-                      onChange={(e) => setEditForm({ ...editForm, customerName: e.target.value })}
-                      className="mt-1 w-full rounded-lg border border-border/80 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-hidden"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-medium text-foreground">
-                      Customer Phone Number
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.customerPhone}
-                      onChange={(e) => setEditForm({ ...editForm, customerPhone: e.target.value })}
-                      className="mt-1 w-full rounded-lg border border-border/80 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-hidden"
-                    />
-                  </div>
-                </div>
-
-                {/* Delivery Address */}
-                <div>
-                  <label className="text-xs font-medium text-foreground">
-                    Delivery / Pickup Address
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.deliveryAddress}
-                    onChange={(e) => setEditForm({ ...editForm, deliveryAddress: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-border/80 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-hidden"
-                  />
-                </div>
-
-                {/* Additional Notes */}
-                <div>
-                  <label className="text-xs font-medium text-foreground">
-                    Notes / Special Requirements
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={editForm.additionalNotes}
-                    onChange={(e) => setEditForm({ ...editForm, additionalNotes: e.target.value })}
-                    className="mt-1 w-full rounded-lg border border-border/80 bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-hidden"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-3 border-t border-border/80 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setEditingRental(null)}
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting} className="gap-2">
-                    {isSubmitting && <RefreshCw className="size-4 animate-spin" />}
-                    <span>Save Changes</span>
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* =========================================================================
-            MODAL 3: DELETE CONFIRMATION MODAL
-            ========================================================================= */}
-        {deletingRental && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-            <div className="relative w-full max-w-md rounded-2xl border border-destructive/20 bg-card p-6 shadow-2xl">
-              <div className="flex items-start gap-3">
-                <div className="rounded-full bg-destructive/10 p-2 text-destructive">
-                  <AlertTriangle className="size-6" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-foreground">
-                    Delete Rental Booking
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Are you sure you want to permanently delete this rental booking?
-                  </p>
-                  <div className="mt-3 rounded-lg border border-border/70 bg-muted/40 p-3 text-xs">
-                    <p className="font-semibold text-foreground">
-                      {deletingRental.equipmentName}
-                    </p>
-                    <p className="text-muted-foreground">
-                      Customer: {deletingRental.customerName} ({deletingRental.customerEmail})
-                    </p>
-                    <p className="text-muted-foreground">
-                      Amount: {formatCurrency(deletingRental.totalAmount)}
-                    </p>
-                  </div>
-                  <p className="mt-2 text-xs font-medium text-destructive">
-                    This action cannot be undone and removes all associated records.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6 flex items-center justify-end gap-3 border-t border-border/80 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setDeletingRental(null)}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleDeleteRental}
-                  disabled={isSubmitting}
-                  className="gap-2"
-                >
-                  {isSubmitting && <RefreshCw className="size-4 animate-spin" />}
-                  <span>Confirm Delete</span>
                 </Button>
               </div>
             </div>

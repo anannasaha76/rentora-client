@@ -125,3 +125,26 @@ export function getAuthHeader(): Record<string, string> {
   const token = getAccessToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
+
+/**
+ * Ensures a valid JWT access token is present, generating or refreshing it if missing.
+ */
+export async function ensureAccessToken(user?: {
+  email?: string | null;
+  id?: string | null;
+  name?: string | null;
+  role?: string | null;
+}): Promise<string | null> {
+  let token = getAccessToken();
+  if (token) return token;
+
+  if (user?.email) {
+    token = await generateJwtAccessToken({
+      email: user.email,
+      id: user.id || undefined,
+      name: user.name || undefined,
+      role: user.role || undefined,
+    });
+  }
+  return token;
+}

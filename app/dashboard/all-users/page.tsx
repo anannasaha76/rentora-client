@@ -429,7 +429,7 @@ export default function AdminAllUsersPage() {
                                 value={role}
                                 onChange={(e) => handleChangeRole(u, e.target.value)}
                                 className={cn(
-                                  "rounded-lg border bg-background px-2 py-1 text-xs font-medium focus:border-primary focus:outline-none transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
+                                  "h-8 rounded-lg border bg-background px-2.5 py-1 text-xs font-medium focus:border-primary focus:outline-none transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
                                   role === "admin"
                                     ? "border-amber-400 text-amber-700 dark:text-amber-300"
                                     : role === "owner"
@@ -449,24 +449,26 @@ export default function AdminAllUsersPage() {
                               size="xs"
                               variant="outline"
                               onClick={() => setManagingUser(u)}
-                              className="gap-1 font-medium"
+                              className="h-8 gap-1 font-medium"
                               title="Manage User Details"
                             >
                               <UserCog className="size-3.5" />
                               <span className="hidden sm:inline">Manage</span>
                             </Button>
 
-                            {/* Delete Button */}
-                            {!isSelf && (
+                            {/* Delete Button Slot: Keeps alignment consistent for all rows including self/admin */}
+                            {!isSelf ? (
                               <Button
                                 size="xs"
                                 variant="ghost"
                                 onClick={() => setDeletingUser(u)}
-                                className="text-destructive hover:bg-destructive/10"
+                                className="size-8 p-0 text-destructive hover:bg-destructive/10"
                                 title="Delete User"
                               >
                                 <Trash2 className="size-3.5" />
                               </Button>
+                            ) : (
+                              <div className="size-8" aria-hidden="true" />
                             )}
                           </div>
                         </td>
