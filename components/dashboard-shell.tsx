@@ -17,7 +17,6 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { RentoraIcon, RentoraLogo } from "@/components/logo"
 import { signOut, useSession } from "@/lib/auth-client"
-import { removeAccessToken } from "@/lib/jwt"
 import { cn } from "@/lib/utils"
 
 const ownerLinks = [
@@ -54,7 +53,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false)
 
   async function handleLogout() {
-    removeAccessToken()
     await signOut()
     setMobileOpen(false)
     router.push("/")

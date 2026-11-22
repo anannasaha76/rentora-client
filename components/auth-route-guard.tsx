@@ -6,7 +6,6 @@ import * as React from "react"
 
 import { buttonVariants } from "@/components/ui/button"
 import { useSession } from "@/lib/auth-client"
-import { getAccessToken, generateJwtAccessToken } from "@/lib/jwt"
 import { cn } from "@/lib/utils"
 
 export function AuthRouteGuard({
@@ -33,16 +32,6 @@ export function AuthRouteGuard({
     if (!session) {
       router.replace("/login")
       return
-    }
-
-    // Ensure JWT access token is active and valid for the session
-    if (!getAccessToken() && session.user?.email) {
-      generateJwtAccessToken({
-        email: session.user.email,
-        id: session.user.id,
-        name: session.user.name,
-        role: session.user.role,
-      }).catch(() => {})
     }
 
     if (

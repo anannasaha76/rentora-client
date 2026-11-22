@@ -1,4 +1,3 @@
-import { getAuthHeader } from "@/lib/jwt"
 import type { RentalBooking } from "@/lib/rental"
 
 export const equipmentApiUrl =
@@ -90,10 +89,7 @@ export type OwnerAnalyticsResponse = {
 export async function getAdminAnalytics(): Promise<AdminAnalyticsResponse> {
   const res = await fetch(`${equipmentApiUrl}/api/analytics/admin`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeader(),
-    },
+    headers: { "Content-Type": "application/json" },
     cache: "no-store",
   })
 
@@ -115,10 +111,7 @@ export async function getOwnerAnalytics(
 
   const res = await fetch(`${equipmentApiUrl}/api/analytics/owner?${query.toString()}`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeader(),
-    },
+    headers: { "Content-Type": "application/json" },
     cache: "no-store",
   })
 

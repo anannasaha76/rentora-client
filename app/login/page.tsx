@@ -21,7 +21,6 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { signIn } from "@/lib/auth-client"
-import { generateJwtAccessToken } from "@/lib/jwt"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -59,7 +58,7 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const { data, error } = await signIn.email({
+      const { error } = await signIn.email({
         email: email.trim(),
         password,
       })
@@ -68,13 +67,6 @@ export default function LoginPage() {
         toast.error(error.message || "Login failed.")
         return
       }
-
-      // Generate JWT Access Token to securely manage session
-      await generateJwtAccessToken({
-        email: email.trim(),
-        id: data?.user?.id,
-        name: data?.user?.name,
-      })
 
       toast.success("Welcome back to Rentora!")
 

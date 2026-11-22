@@ -17,7 +17,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { RentoraLogo } from "@/components/logo"
 import { signOut, useSession } from "@/lib/auth-client"
-import { removeAccessToken } from "@/lib/jwt"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -46,7 +45,6 @@ export function Navbar() {
     setLoggingOut(true)
 
     try {
-      removeAccessToken()
       await signOut()
       setOpen(false)
       router.push("/")

@@ -1,5 +1,3 @@
-import { getAuthHeader } from "@/lib/jwt"
-
 export type RentalType = "Daily" | "Weekly" | "Monthly"
 export type EquipmentStatus = "Pending" | "Approved" | "Rejected"
 
@@ -85,10 +83,7 @@ export async function getOwnerEquipment(
 
   const res = await fetch(`${equipmentApiUrl}/api/equipment/owner?${query.toString()}`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeader(),
-    },
+    headers: { "Content-Type": "application/json" },
     cache: "no-store",
   })
 
@@ -122,10 +117,7 @@ export async function updateEquipment(
 ): Promise<{ message: string; equipment: EquipmentListing }> {
   const res = await fetch(`${equipmentApiUrl}/api/equipment/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeader(),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(updates),
   })
 
@@ -142,10 +134,7 @@ export async function deleteEquipment(
 ): Promise<{ message: string; id: string }> {
   const res = await fetch(`${equipmentApiUrl}/api/equipment/${id}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeader(),
-    },
+    headers: { "Content-Type": "application/json" },
   })
 
   const data = await res.json().catch(() => null)
@@ -226,10 +215,7 @@ export async function updateEquipmentStatus(
 ): Promise<{ message: string; equipment: EquipmentListing }> {
   const res = await fetch(`${equipmentApiUrl}/api/equipment/${id}/status`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeader(),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
   })
 
