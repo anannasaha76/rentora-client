@@ -6,7 +6,6 @@ import * as React from "react"
 
 import { buttonVariants } from "@/components/ui/button"
 import { useSession } from "@/lib/auth-client"
-import { ensureAccessToken } from "@/lib/jwt"
 import { cn } from "@/lib/utils"
 
 export function OwnerRouteGuard({ children }: { children: React.ReactNode }) {
@@ -21,19 +20,8 @@ export function OwnerRouteGuard({ children }: { children: React.ReactNode }) {
       return
     }
 
-    if (session.user?.role !== "owner") {
+    if (session.user.role !== "owner") {
       router.replace("/")
-      return
-    }
-
-    // Proactively make sure access token exists for owner API calls
-    if (session.user?.email) {
-      ensureAccessToken({
-        email: session.user.email,
-        id: session.user.id,
-        name: session.user.name,
-        role: session.user.role,
-      }).catch(() => {})
     }
   }, [isPending, router, session])
 

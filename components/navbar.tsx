@@ -50,6 +50,7 @@ export function Navbar() {
       await signOut()
       setOpen(false)
       router.push("/")
+      router.refresh()
     } catch (error) {
       console.error("Logout failed:", error)
     } finally {

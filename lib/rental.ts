@@ -1,5 +1,4 @@
 import { getAuthHeader } from "@/lib/jwt"
-import { backendApiUrl } from "@/lib/api"
 
 export type PaymentStatus = "Paid" | "Unpaid" | "Pending" | "Refunded"
 export type BookingStatus =
@@ -49,7 +48,8 @@ export type RentalBooking = {
   updatedAt?: string
 }
 
-export const equipmentApiUrl = backendApiUrl
+export const equipmentApiUrl =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 
 export async function getOwnerRentals(
   ownerEmail: string,

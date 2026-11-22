@@ -149,6 +149,7 @@ export default function RegisterPage() {
 
       toast.success("Welcome to Rentora! Account created successfully.")
       router.push("/")
+      router.refresh()
     } catch {
       toast.error("Registration failed. Please try again.")
     } finally {

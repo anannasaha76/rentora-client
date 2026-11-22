@@ -1,5 +1,4 @@
-import { ensureAccessToken, getAuthHeader } from "@/lib/jwt"
-import { backendApiUrl } from "@/lib/api"
+import { getAuthHeader } from "@/lib/jwt"
 
 export type RentalType = "Daily" | "Weekly" | "Monthly"
 export type EquipmentStatus = "Pending" | "Approved" | "Rejected"
@@ -73,7 +72,8 @@ export const defaultCategories = equipmentCategories
 export const defaultConditions = equipmentConditions
 export const defaultRentalTypes = rentalTypes
 
-export const equipmentApiUrl = backendApiUrl
+export const equipmentApiUrl =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 
 export async function getOwnerEquipment(
   ownerEmail: string,
@@ -82,9 +82,6 @@ export async function getOwnerEquipment(
   const query = new URLSearchParams()
   if (ownerEmail) query.set("email", ownerEmail)
   if (ownerId) query.set("ownerId", ownerId)
-
-  // Auto-generate or restore access token if missing
-  await ensureAccessToken({ email: ownerEmail, id: ownerId, role: "owner" })
 
   const res = await fetch(`${equipmentApiUrl}/api/equipment/owner?${query.toString()}`, {
     method: "GET",

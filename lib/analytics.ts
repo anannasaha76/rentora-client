@@ -1,8 +1,8 @@
 import { getAuthHeader } from "@/lib/jwt"
-import { backendApiUrl } from "@/lib/api"
 import type { RentalBooking } from "@/lib/rental"
 
-export const equipmentApiUrl = backendApiUrl
+export const equipmentApiUrl =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 
 export type MonthlyBookingStat = {
   key: string
