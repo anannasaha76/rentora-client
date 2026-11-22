@@ -24,7 +24,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
+      className={cn("scroll-smooth antialiased", fontMono.variable, "font-sans", geist.variable)}
     >
       <body className="flex min-h-screen flex-col bg-background text-foreground">
         <ThemeProvider>

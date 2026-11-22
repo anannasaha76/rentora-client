@@ -227,3 +227,25 @@ export async function updateEquipmentStatus(
   return data
 }
 
+export async function getFeaturedEquipment(): Promise<EquipmentListing[]> {
+  try {
+    const res = await fetch(`${equipmentApiUrl}/api/equipment/featured`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    })
+
+    if (!res.ok) {
+      const fallback = await getAllEquipment({ status: "Approved", limit: 6 })
+      return fallback.equipment.slice(0, 6)
+    }
+
+    const data = await res.json()
+    return Array.isArray(data) ? data : data.equipment || []
+  } catch (err) {
+    console.warn("Failed to fetch featured equipment from endpoint, using fallback:", err)
+    const fallback = await getAllEquipment({ status: "Approved", limit: 6 })
+    return fallback.equipment.slice(0, 6)
+  }
+}
+

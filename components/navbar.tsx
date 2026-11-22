@@ -12,9 +12,11 @@ import { cn } from "@/lib/utils"
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/equipment", label: "All Equipment" },
-  { href: "/about", label: "About us" },
+  { href: "/#categories", label: "Categories" },
+  { href: "/#how-it-works", label: "How It Works" },
+  { href: "/#why-choose-us", label: "Why Rentora" },
+  { href: "/#reviews", label: "Reviews" },
   { href: "/contact", label: "Contact Us" },
-  { href: "/how-it-works", label: "How it work" },
 ]
 
 export function Navbar() {
