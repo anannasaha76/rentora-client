@@ -554,28 +554,45 @@ export default function EquipmentDetailsPage() {
                     </div>
 
                     <div className="text-right">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          equipment.availableQuantity > 0
-                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400"
-                            : "bg-destructive/10 text-destructive"
-                        }`}
-                      >
-                        {equipment.availableQuantity > 0 ? "Ready to Rent" : "Unavailable"}
-                      </span>
+                      {equipment.status !== "Approved" ? (
+                        <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-950/50 dark:text-amber-400">
+                          {equipment.status}
+                        </span>
+                      ) : (
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            equipment.availableQuantity > 0
+                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400"
+                              : "bg-destructive/10 text-destructive"
+                          }`}
+                        >
+                          {equipment.availableQuantity > 0 ? "Ready to Rent" : "Unavailable"}
+                        </span>
+                      )}
                     </div>
                   </div>
+
+                  {equipment.status !== "Approved" && (
+                    <div className="mt-4 rounded-xl border border-amber-300/40 bg-amber-50/60 p-3 text-xs text-amber-900 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-300">
+                      <strong>Moderation Notice:</strong> This listing is currently{" "}
+                      <strong>{equipment.status}</strong> and is not open for public bookings.
+                    </div>
+                  )}
 
                   <div className="mt-6 space-y-3">
                     {/* Primary Booking Button */}
                     <Button
                       size="lg"
                       className="w-full gap-2 font-semibold shadow-md"
-                      disabled={equipment.availableQuantity <= 0}
+                      disabled={equipment.availableQuantity <= 0 || equipment.status !== "Approved"}
                       onClick={() => setIsBookingOpen(true)}
                     >
                       <Calendar className="size-4" />
-                      {equipment.availableQuantity > 0 ? "Rent Now / Book Equipment" : "Currently Out of Stock"}
+                      {equipment.status !== "Approved"
+                        ? `Listing ${equipment.status} — Booking Disabled`
+                        : equipment.availableQuantity > 0
+                        ? "Rent Now / Book Equipment"
+                        : "Currently Out of Stock"}
                     </Button>
 
                     {/* Add to Favorites Toggle Button */}

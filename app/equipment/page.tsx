@@ -110,11 +110,16 @@ export default function AllEquipmentPage() {
           maxPrice: maxPrice !== "" ? Number(maxPrice) : undefined,
           availability: availability !== "all" ? availability : undefined,
           sort: sortBy,
+          status: "Approved", // Strictly display approved equipment on public page
           page: pageToLoad,
           limit: 9, // 9 items per page (fits 3-column grid cleanly)
         })
 
-        const items = Array.isArray(response.equipment) ? response.equipment : []
+        const rawItems = Array.isArray(response.equipment) ? response.equipment : []
+        // Client-side guarantee: only Approved equipment items are displayed to public customers
+        const items = rawItems.filter(
+          (item) => (item.status || "").toLowerCase() === "approved"
+        )
         setEquipmentList(items)
         setTotalItems(response.total ?? items.length)
         setTotalPages(response.totalPages ?? 1)
