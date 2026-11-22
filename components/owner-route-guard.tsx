@@ -20,7 +20,7 @@ export function OwnerRouteGuard({ children }: { children: React.ReactNode }) {
       return
     }
 
-    if (session.user.role !== "owner") {
+    if (session.user.role?.toLowerCase() !== "owner") {
       router.replace("/")
     }
   }, [isPending, router, session])
@@ -33,7 +33,7 @@ export function OwnerRouteGuard({ children }: { children: React.ReactNode }) {
     )
   }
 
-  if (!session || session.user.role !== "owner") {
+  if (!session || session.user.role?.toLowerCase() !== "owner") {
     return (
       <div className="mx-auto flex min-h-[50vh] max-w-md items-center justify-center px-4 sm:px-6">
         <div className="w-full rounded-xl border bg-card p-6 text-card-foreground shadow-sm">

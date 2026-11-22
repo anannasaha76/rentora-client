@@ -1,3 +1,5 @@
+import { getAuthHeaders } from "./getTokenFromClient"
+
 export type RentalType = "Daily" | "Weekly" | "Monthly"
 export type EquipmentStatus = "Pending" | "Approved" | "Rejected"
 
@@ -83,7 +85,7 @@ export async function getOwnerEquipment(
 
   const res = await fetch(`${equipmentApiUrl}/api/equipment/owner?${query.toString()}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     cache: "no-store",
   })
 
@@ -99,7 +101,7 @@ export async function getOwnerEquipment(
 export async function getEquipmentById(id: string): Promise<EquipmentListing> {
   const res = await fetch(`${equipmentApiUrl}/api/equipment/${id}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     cache: "no-store",
   })
 
@@ -117,7 +119,7 @@ export async function updateEquipment(
 ): Promise<{ message: string; equipment: EquipmentListing }> {
   const res = await fetch(`${equipmentApiUrl}/api/equipment/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     body: JSON.stringify(updates),
   })
 
@@ -134,7 +136,7 @@ export async function deleteEquipment(
 ): Promise<{ message: string; id: string }> {
   const res = await fetch(`${equipmentApiUrl}/api/equipment/${id}`, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
   })
 
   const data = await res.json().catch(() => null)
@@ -187,7 +189,7 @@ export async function getAllEquipment(
 
   const res = await fetch(`${equipmentApiUrl}/api/equipment?${params.toString()}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     cache: "no-store",
   })
 
@@ -215,7 +217,7 @@ export async function updateEquipmentStatus(
 ): Promise<{ message: string; equipment: EquipmentListing }> {
   const res = await fetch(`${equipmentApiUrl}/api/equipment/${id}/status`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     body: JSON.stringify({ status }),
   })
 
@@ -231,7 +233,7 @@ export async function getFeaturedEquipment(): Promise<EquipmentListing[]> {
   try {
     const res = await fetch(`${equipmentApiUrl}/api/equipment/featured`, {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
       cache: "no-store",
     })
 
@@ -266,7 +268,7 @@ export async function getRentalCategories(): Promise<RentalCategory[]> {
   try {
     const res = await fetch(`${equipmentApiUrl}/api/equipment/categories`, {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
       cache: "no-store",
     })
 

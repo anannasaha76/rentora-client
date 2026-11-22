@@ -1,3 +1,5 @@
+import { getAuthHeaders } from "./getTokenFromClient"
+
 export type UserProfile = {
   id?: string
   _id?: string
@@ -20,7 +22,7 @@ export async function getUserProfile(email: string): Promise<UserProfile> {
     `${apiUrl}/api/users/profile/${encodeURIComponent(email)}`,
     {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
       cache: "no-store",
     }
   )
@@ -46,7 +48,7 @@ export async function updateUserProfile(
     `${apiUrl}/api/users/profile/${encodeURIComponent(email)}`,
     {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
       body: JSON.stringify(updates),
     }
   )
@@ -80,7 +82,7 @@ export async function getAllUsers(query?: {
 
   const res = await fetch(`${apiUrl}/api/users?${params.toString()}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     cache: "no-store",
   })
 
@@ -98,7 +100,7 @@ export async function updateUserRole(
 ): Promise<{ message: string; user: UserProfile }> {
   const res = await fetch(`${apiUrl}/api/users/${encodeURIComponent(userId)}/role`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     body: JSON.stringify({ role }),
   })
 
@@ -116,7 +118,7 @@ export async function manageUser(
 ): Promise<{ message: string; user: UserProfile }> {
   const res = await fetch(`${apiUrl}/api/users/${encodeURIComponent(userId)}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     body: JSON.stringify(updates),
   })
 
@@ -133,7 +135,7 @@ export async function deleteUser(
 ): Promise<{ message: string; id: string }> {
   const res = await fetch(`${apiUrl}/api/users/${encodeURIComponent(userId)}`, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
   })
 
   const data = await res.json().catch(() => null)

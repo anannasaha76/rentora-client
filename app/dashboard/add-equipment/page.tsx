@@ -7,6 +7,7 @@ import { toast } from "react-toastify"
 import { OwnerRouteGuard } from "@/components/owner-route-guard"
 import { Button } from "@/components/ui/button"
 import { useSession } from "@/lib/auth-client"
+import { getAuthHeaders } from "@/lib/getTokenFromClient"
 import {
   equipmentApiUrl,
   type EquipmentFormValues,
@@ -165,7 +166,7 @@ function AddEquipmentForm() {
 
       const res = await fetch(`${equipmentApiUrl}/api/equipment`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
         body: JSON.stringify(payload),
       })
       const data: unknown = await res.json().catch(() => null)

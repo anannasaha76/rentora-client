@@ -1,3 +1,5 @@
+import { getAuthHeaders } from "./getTokenFromClient"
+
 export type PaymentStatus = "Paid" | "Unpaid" | "Pending" | "Refunded"
 export type BookingStatus =
   | "Pending"
@@ -59,7 +61,7 @@ export async function getOwnerRentals(
 
   const res = await fetch(`${equipmentApiUrl}/api/rentals/owner?${query.toString()}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     cache: "no-store",
   })
 
@@ -81,7 +83,7 @@ export async function getCustomerRentals(
 
   const res = await fetch(`${equipmentApiUrl}/api/rentals/customer?${query.toString()}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     cache: "no-store",
   })
 
@@ -99,7 +101,7 @@ export async function updateRentalStatus(
 ): Promise<{ message: string; rental: RentalBooking }> {
   const res = await fetch(`${equipmentApiUrl}/api/rentals/${id}/status`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     body: JSON.stringify(updates),
   })
 
@@ -142,7 +144,7 @@ export async function createRentalBooking(
 ): Promise<{ message: string; id: string; booking: RentalBooking }> {
   const res = await fetch(`${equipmentApiUrl}/api/rentals`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     body: JSON.stringify(payload),
   })
 
@@ -157,7 +159,7 @@ export async function createRentalBooking(
 export async function getRentalById(id: string): Promise<RentalBooking> {
   const res = await fetch(`${equipmentApiUrl}/api/rentals/${id}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     cache: "no-store",
   })
 
@@ -193,7 +195,7 @@ export async function processPayment(payload: {
 }): Promise<{ message: string; payment: PaymentRecord; booking: RentalBooking }> {
   const res = await fetch(`${equipmentApiUrl}/api/payments`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     body: JSON.stringify(payload),
   })
 
@@ -208,7 +210,7 @@ export async function processPayment(payload: {
 export async function getPaymentById(id: string): Promise<PaymentRecord> {
   const res = await fetch(`${equipmentApiUrl}/api/payments/${id}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     cache: "no-store",
   })
 
@@ -249,7 +251,7 @@ export async function getAllRentals(options?: {
   const queryString = query.toString() ? `?${query.toString()}` : ""
   const res = await fetch(`${equipmentApiUrl}/api/rentals${queryString}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     cache: "no-store",
   })
 
@@ -274,7 +276,7 @@ export async function manageRental(
 ): Promise<{ message: string; rental: RentalBooking }> {
   const res = await fetch(`${equipmentApiUrl}/api/rentals/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     body: JSON.stringify(updates),
   })
 
@@ -289,7 +291,7 @@ export async function manageRental(
 export async function deleteRental(id: string): Promise<{ message: string }> {
   const res = await fetch(`${equipmentApiUrl}/api/rentals/${id}`, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
   })
 
   const data = await res.json().catch(() => null)

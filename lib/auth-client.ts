@@ -1,13 +1,19 @@
-import { createAuthClient } from "better-auth/react"
-import { inferAdditionalFields } from "better-auth/client/plugins"
-import { jwtClient } from "better-auth/client/plugins";
+import { createAuthClient } from "better-auth/react";
+import { inferAdditionalFields, jwtClient } from "better-auth/client/plugins";
+
+const baseURL =
+  process.env.NEXT_PUBLIC_BETTER_AUTH_URL ||
+  (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
 
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
+  baseURL,
   plugins: [
     inferAdditionalFields({
       user: {
         role: {
+          type: "string",
+        },
+        requestedRole: {
           type: "string",
         },
         phoneNumber: {
@@ -17,8 +23,9 @@ export const authClient = createAuthClient({
           type: "string",
         },
       },
-    }),jwtClient()
+    }),
+    jwtClient(),
   ],
-})
+});
 
-export const { signIn, signUp, signOut, useSession } = authClient
+export const { signIn, signUp, signOut, useSession } = authClient;

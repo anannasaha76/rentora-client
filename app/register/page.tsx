@@ -31,7 +31,7 @@ export default function RegisterPage() {
   const [email, setEmail] = React.useState("")
   const [photo, setPhoto] = React.useState("")
   const [password, setPassword] = React.useState("")
-  const [role, setRole] = React.useState("customer")
+  const [requestedRole, setRequestedRole] = React.useState("customer")
 
   const [loading, setLoading] = React.useState(false)
   const [uploading, setUploading] = React.useState(false)
@@ -116,7 +116,7 @@ export default function RegisterPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    if (!name.trim() || !email.trim() || !photo || !password || !role) {
+    if (!name.trim() || !email.trim() || !photo || !password || !requestedRole) {
       toast.error("Please complete all required fields.")
       return
     }
@@ -126,7 +126,7 @@ export default function RegisterPage() {
       return
     }
 
-    if (!["customer", "owner"].includes(role)) {
+    if (!["customer", "owner"].includes(requestedRole)) {
       toast.error("Please select a valid account type.")
       return
     }
@@ -139,8 +139,8 @@ export default function RegisterPage() {
         email: email.trim(),
         password,
         image: photo,
-        role,
-      } as Parameters<typeof signUp.email>[0] & { role: string })
+        requestedRole,
+      } as Parameters<typeof signUp.email>[0] & { requestedRole: string })
 
       if (error) {
         toast.error(error.message || "Registration failed.")
@@ -410,14 +410,14 @@ export default function RegisterPage() {
 
             {/* Account type */}
             <div>
-              <label htmlFor="role" className={labelClass}>
+              <label htmlFor="requestedRole" className={labelClass}>
                 Account type <span className="text-red-500">*</span>
               </label>
 
               <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
+                id="requestedRole"
+                value={requestedRole}
+                onChange={(e) => setRequestedRole(e.target.value)}
                 className="h-12 w-full rounded-xl border border-gray-200 bg-gray-50/70 px-4 text-sm text-gray-800 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10"
                 required
               >

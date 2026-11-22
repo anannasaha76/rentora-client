@@ -1,4 +1,5 @@
 import type { RentalBooking } from "@/lib/rental"
+import { getAuthHeaders } from "./getTokenFromClient"
 
 export const equipmentApiUrl =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
@@ -89,7 +90,7 @@ export type OwnerAnalyticsResponse = {
 export async function getAdminAnalytics(): Promise<AdminAnalyticsResponse> {
   const res = await fetch(`${equipmentApiUrl}/api/analytics/admin`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     cache: "no-store",
   })
 
@@ -111,7 +112,7 @@ export async function getOwnerAnalytics(
 
   const res = await fetch(`${equipmentApiUrl}/api/analytics/owner?${query.toString()}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     cache: "no-store",
   })
 

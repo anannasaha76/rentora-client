@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { AuthRouteGuard } from "@/components/auth-route-guard"
 
 function StripeCheckoutContent() {
   const router = useRouter()
@@ -263,15 +264,17 @@ function StripeCheckoutContent() {
 
 export default function StripeCheckoutPage() {
   return (
-    <React.Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <p className="text-sm text-muted-foreground">Redirecting to Stripe Checkout...</p>
-        </div>
-      }
-    >
-      <StripeCheckoutContent />
-    </React.Suspense>
+    <AuthRouteGuard>
+      <React.Suspense
+        fallback={
+          <div className="flex min-h-screen items-center justify-center">
+            <p className="text-sm text-muted-foreground">Redirecting to Stripe Checkout...</p>
+          </div>
+        }
+      >
+        <StripeCheckoutContent />
+      </React.Suspense>
+    </AuthRouteGuard>
   )
 }
 

@@ -16,6 +16,7 @@ import {
 
 import { AuthRouteGuard } from "@/components/auth-route-guard"
 import { Button } from "@/components/ui/button"
+import { getAuthHeaders } from "@/lib/getTokenFromClient"
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams()
@@ -75,7 +76,7 @@ function PaymentSuccessContent() {
       // Call Express API POST /api/bookings to record booking & payment
       const res = await fetch(`${apiUrl}/api/bookings`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
         body: JSON.stringify({
           ...metadata,
           transactionId: txId,

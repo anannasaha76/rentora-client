@@ -1,3 +1,5 @@
+import { getAuthHeaders } from "./getTokenFromClient"
+
 export type FavoriteItem = {
   _id: string
   id?: string
@@ -27,7 +29,7 @@ export async function getCustomerFavorites(
 ): Promise<FavoriteItem[]> {
   const res = await fetch(`${apiUrl}/api/favorites/${encodeURIComponent(email)}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     cache: "no-store",
   })
 
@@ -47,7 +49,7 @@ export async function checkFavoriteStatus(
     `${apiUrl}/api/favorites/check/${encodeURIComponent(email)}/${encodeURIComponent(equipmentId)}`,
     {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
       cache: "no-store",
     }
   )
@@ -64,7 +66,7 @@ export async function addFavorite(
 ): Promise<{ message: string; favorite: FavoriteItem }> {
   const res = await fetch(`${apiUrl}/api/favorites`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     body: JSON.stringify(item),
   })
 
@@ -81,7 +83,7 @@ export async function removeFavorite(
 ): Promise<{ message: string; id: string }> {
   const res = await fetch(`${apiUrl}/api/favorites/${id}`, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
   })
 
   const data = await res.json().catch(() => null)
@@ -100,7 +102,7 @@ export async function removeFavoriteByEquipment(
     `${apiUrl}/api/favorites/item/${encodeURIComponent(email)}/${encodeURIComponent(equipmentId)}`,
     {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(await getAuthHeaders()) },
     }
   )
 

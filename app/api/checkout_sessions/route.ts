@@ -1,10 +1,23 @@
 import { NextResponse } from "next/server"
 import { headers } from "next/headers"
 import { stripe } from "@/lib/stripe"
+import { auth } from "@/lib/auth"
+import { getTokenFromServer } from "@/lib/getTokenFromServer"
 
 export async function POST(req: Request) {
   try {
-    const origin = (await headers()).get("origin") || "http://localhost:3000"
+    const requestHeaders = await headers()
+    const token = await getTokenFromServer()
+    if (!token) {
+      return NextResponse.json({ error: "Sign-in required." }, { status: 401 })
+    }
+
+    const session = await auth.api.getSession({ headers: requestHeaders })
+    if (!session) {
+      return NextResponse.json({ error: "Sign-in required." }, { status: 401 })
+    }
+
+    const origin = requestHeaders.get("origin") || "http://localhost:3000"
     const body = await req.json()
 
     const {
@@ -31,10 +44,21 @@ export async function POST(req: Request) {
       rentalType = "Daily",
     } = body
 
-    if (!equipmentId || !equipmentName || !customerEmail || !totalAmount) {
+    if (!equipmentId || !equipmentName || !totalAmount) {
       return NextResponse.json(
         { error: "Missing required checkout parameters." },
         { status: 400 }
+      )
+    }
+
+    const authenticatedEmail = session.user.email
+    if (
+      customerEmail &&
+      String(customerEmail).toLowerCase() !== authenticatedEmail.toLowerCase()
+    ) {
+      return NextResponse.json(
+        { error: "Customer email does not match the signed-in account." },
+        { status: 403 }
       )
     }
 
@@ -50,9 +74,9 @@ export async function POST(req: Request) {
       ownerId: String(ownerId || ""),
       ownerName: String(ownerName || ""),
       ownerEmail: String(ownerEmail || ""),
-      customerId: String(customerId || ""),
-      customerName: String(customerName || ""),
-      customerEmail: String(customerEmail || ""),
+      customerId: session.user.id,
+      customerName: session.user.name,
+      customerEmail: authenticatedEmail,
       customerPhone: String(customerPhone || "N/A"),
       deliveryAddress: String(deliveryAddress || "Self-Pickup / Site Address"),
       additionalNotes: String(additionalNotes || ""),
@@ -86,7 +110,7 @@ export async function POST(req: Request) {
             },
           ],
           metadata,
-          customer_email: customerEmail,
+          customer_email: authenticatedEmail,
           success_url: `${origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${origin}/equipment/${equipmentId}?cancelled=true`,
         })
@@ -117,6 +141,11 @@ export async function POST(req: Request) {
 // GET /api/checkout_sessions?session_id=... (Section 4: Retrieve session details server-side)
 export async function GET(req: Request) {
   try {
+    const token = await getTokenFromServer()
+    if (!token) {
+      return NextResponse.json({ error: "Sign-in required." }, { status: 401 })
+    }
+
     const { searchParams } = new URL(req.url)
     const sessionId = searchParams.get("session_id")
     if (!sessionId) {
