@@ -20,7 +20,6 @@ import {
 } from "lucide-react"
 import { toast } from "react-toastify"
 
-import { AuthRouteGuard } from "@/components/auth-route-guard"
 import { Button } from "@/components/ui/button"
 import { useSession } from "@/lib/auth-client"
 import { getUserProfile, updateUserProfile, type UserProfile } from "@/lib/user"
@@ -196,8 +195,7 @@ export default function MyProfilePage() {
       : "Manage your personal contact details, delivery addresses, and rental preferences."
 
   return (
-    <AuthRouteGuard>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -541,6 +539,5 @@ export default function MyProfilePage() {
           </div>
         )}
       </div>
-    </AuthRouteGuard>
   )
 }

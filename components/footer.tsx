@@ -3,19 +3,12 @@
 import * as React from "react"
 import Link from "next/link"
 import {
-  CheckCircle2,
-  Headphones,
   Mail,
   MapPin,
-  Package,
   Phone,
-  Send,
-  ShieldCheck,
-  Truck,
 } from "lucide-react"
-import { toast } from "react-toastify"
 
-import { Button } from "@/components/ui/button"
+import { RentoraLogo } from "@/components/logo"
 
 // Official X (formerly Twitter) brand logo SVG
 function XIcon({ className = "size-4" }: { className?: string }) {
@@ -52,7 +45,7 @@ function LinkedInIcon({ className = "size-4" }: { className?: string }) {
       fill="currentColor"
       className={className}
     >
-      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2z" />
+      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
     </svg>
   )
 }
@@ -71,136 +64,27 @@ function InstagramIcon({ className = "size-4" }: { className?: string }) {
 }
 
 export function Footer() {
-  const [newsletterEmail, setNewsletterEmail] = React.useState("")
-  const [subscribed, setSubscribed] = React.useState(false)
-
-  function handleNewsletterSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!newsletterEmail.trim()) {
-      toast.error("Please enter a valid email address.")
-      return
-    }
-    setSubscribed(true)
-    toast.success("Thank you for subscribing to Rentora updates!")
-    setNewsletterEmail("")
-  }
-
   return (
     <footer className="w-full border-t bg-card text-card-foreground">
-      {/* Top Value Propositions Bar */}
-      <div className="border-b border-border/60 bg-muted/30">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 divide-y divide-border/60 sm:grid-cols-3 sm:divide-x sm:divide-y-0 px-4 py-6 text-xs sm:px-6">
-          <div className="flex items-center gap-3 py-3 sm:py-0 sm:pr-4">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <ShieldCheck className="size-5" />
-            </span>
-            <div>
-              <p className="font-semibold text-foreground">Verified Equipment Owners</p>
-              <p className="text-muted-foreground">Every listing undergoes administrative review</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 py-3 sm:py-0 sm:px-4">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <CheckCircle2 className="size-5" />
-            </span>
-            <div>
-              <p className="font-semibold text-foreground">Secure Stripe Payments</p>
-              <p className="text-muted-foreground">Encrypted transactions & automated booking receipts</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 py-3 sm:py-0 sm:pl-4">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Headphones className="size-5" />
-            </span>
-            <div>
-              <p className="font-semibold text-foreground">24/7 Rental Assistance</p>
-              <p className="text-muted-foreground">Dedicated support team for dispatch and queries</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Footer Links & Information */}
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-12">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-12">
           {/* Brand & Mission Column */}
-          <div className="space-y-4 md:col-span-4">
-            <Link href="/" className="inline-flex items-center gap-2">
-              <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-base font-bold text-primary-foreground shadow-xs">
-                R
-              </span>
-              <span className="text-xl font-bold tracking-tight">Rentora</span>
-            </Link>
-            <p className="text-xs leading-relaxed text-muted-foreground">
+          <div className="space-y-4 md:col-span-5">
+            <RentoraLogo size="md" href="/" withTagline />
+            <p className="text-xs leading-relaxed text-muted-foreground max-w-sm">
               Rentora is the premier equipment rental marketplace connecting verified equipment
               owners with contractors, creators, and individuals nationwide. Transparent pricing,
               flexible durations, and secure bookings.
             </p>
-
-            <div className="space-y-2 text-xs text-muted-foreground pt-1">
-              <div className="flex items-center gap-2">
-                <MapPin className="size-3.5 text-primary shrink-0" />
-                <span>1200 Innovation Way, Suite 500, Chicago, IL</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="size-3.5 text-primary shrink-0" />
-                <span>+1 (800) 555-RENT (7368)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="size-3.5 text-primary shrink-0" />
-                <span>support@rentora.com</span>
-              </div>
-            </div>
-
-            {/* Social Media Links with new X logo */}
-            <div className="flex items-center gap-2 pt-2">
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="X (formerly Twitter)"
-                className="flex size-8 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <XIcon className="size-3.5" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="LinkedIn"
-                className="flex size-8 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <LinkedInIcon className="size-3.5" />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Facebook"
-                className="flex size-8 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <FacebookIcon className="size-3.5" />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Instagram"
-                className="flex size-8 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <InstagramIcon className="size-3.5" />
-              </a>
-            </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-3 sm:col-span-1 md:col-span-2">
+          {/* Navigation Column */}
+          <div className="space-y-3 sm:col-span-1 md:col-span-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
               Navigation
             </h3>
-            <ul className="space-y-2 text-xs text-muted-foreground">
+            <ul className="space-y-2.5 text-xs text-muted-foreground">
               <li>
                 <Link href="/" className="transition-colors hover:text-foreground">
                   Home
@@ -211,9 +95,15 @@ export function Footer() {
                   All Equipment
                 </Link>
               </li>
+              
               <li>
-                <Link href="/about" className="transition-colors hover:text-foreground">
-                  About Us
+                <Link href="/#how-it-works" className="transition-colors hover:text-foreground">
+                  How It Works
+                </Link>
+              </li>
+              <li>
+                <Link href="/#reviews" className="transition-colors hover:text-foreground">
+                  Customer Reviews
                 </Link>
               </li>
               <li>
@@ -221,118 +111,64 @@ export function Footer() {
                   Contact Us
                 </Link>
               </li>
-              <li>
-                <Link href="/how-it-works" className="transition-colors hover:text-foreground">
-                  How It Works
-                </Link>
-              </li>
             </ul>
           </div>
 
-          {/* Popular Categories */}
-          <div className="space-y-3 sm:col-span-1 md:col-span-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
-              Equipment Categories
-            </h3>
-            <ul className="space-y-2 text-xs text-muted-foreground">
-              <li>
-                <Link
-                  href="/equipment?category=Construction+Equipment"
-                  className="transition-colors hover:text-foreground"
-                >
-                  Construction Equipment
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/equipment?category=Photography+Equipment"
-                  className="transition-colors hover:text-foreground"
-                >
-                  Photography Equipment
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/equipment?category=Vehicles+%26+Transportation"
-                  className="transition-colors hover:text-foreground"
-                >
-                  Vehicles & Transportation
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/equipment?category=Agriculture+Equipment"
-                  className="transition-colors hover:text-foreground"
-                >
-                  Agriculture Equipment
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/equipment?category=Electronics"
-                  className="transition-colors hover:text-foreground"
-                >
-                  Electronics & Power Tools
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/equipment?category=Event+Equipment"
-                  className="transition-colors hover:text-foreground"
-                >
-                  Event & Stage Equipment
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Portals & Newsletter */}
-          <div className="space-y-4 md:col-span-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
-              Stay Informed
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Subscribe to get seasonal rental discounts, newly added equipment alerts, and industry
-              tips.
-            </p>
-
-            <form onSubmit={handleNewsletterSubmit} className="space-y-2">
-              <div className="flex gap-1.5">
-                <input
-                  type="email"
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value)}
-                  placeholder="name@company.com"
-                  className="flex h-9 w-full rounded-lg border border-input bg-background px-3 text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                  required
-                />
-                <Button type="submit" size="sm" className="shrink-0 gap-1 px-3">
-                  <Send className="size-3" />
-                  <span className="sr-only sm:not-sr-only text-xs">Join</span>
-                </Button>
+          {/* Contact Details & Social Links (Right column) */}
+          <div className="space-y-4 sm:col-span-1 md:col-span-4">
+            <div className="space-y-3 text-xs text-muted-foreground">
+              <div className="flex items-start gap-2.5">
+                <MapPin className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <span className="text-foreground/90">1200 Innovation Way, Suite 500, Chicago, IL</span>
               </div>
-              <p className="text-[10px] text-muted-foreground">
-                Zero spam. Unsubscribe at any time.
-              </p>
-            </form>
-
-            <div className="pt-2">
-              <h4 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Dashboards
-              </h4>
-              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                <Link href="/dashboard/my-rentals" className="hover:text-foreground">
-                  My Rentals
-                </Link>
-                <span>•</span>
-                <Link href="/dashboard/favorites" className="hover:text-foreground">
-                  Favorites
-                </Link>
-                <span>•</span>
-                <Link href="/dashboard/my-equipment" className="hover:text-foreground">
-                  Owner Portal
-                </Link>
+              <div className="flex items-center gap-2.5">
+                <Phone className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span className="text-foreground/90">+1 (800) 555-RENT (7368)</span>
               </div>
+              <div className="flex items-center gap-2.5">
+                <Mail className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span className="text-foreground/90">support@rentora.com</span>
+              </div>
+            </div>
+
+            {/* Social Media Links matching user reference image */}
+            <div className="flex items-center gap-2.5 pt-1">
+              <a
+                href="https://x.com"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="X (formerly Twitter)"
+                className="flex size-10 items-center justify-center rounded-xl border border-border/80 bg-background text-muted-foreground transition-all hover:bg-muted hover:text-foreground hover:border-foreground/30 shadow-xs"
+              >
+                <XIcon className="size-4" />
+              </a>
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="LinkedIn"
+                className="flex size-10 items-center justify-center rounded-xl border border-border/80 bg-background text-muted-foreground transition-all hover:bg-muted hover:text-foreground hover:border-foreground/30 shadow-xs"
+              >
+                <LinkedInIcon className="size-4" />
+              </a>
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Facebook"
+                className="flex size-10 items-center justify-center rounded-xl border border-border/80 bg-background text-muted-foreground transition-all hover:bg-muted hover:text-foreground hover:border-foreground/30 shadow-xs"
+              >
+                <FacebookIcon className="size-4" />
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+                className="flex size-10 items-center justify-center rounded-xl border border-border/80 bg-background text-muted-foreground transition-all hover:bg-muted hover:text-foreground hover:border-foreground/30 shadow-xs"
+              >
+                <InstagramIcon className="size-4" />
+              </a>
             </div>
           </div>
         </div>
@@ -340,23 +176,9 @@ export function Footer() {
         {/* Bottom Legal & Copyright Bar */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
           <p>© {new Date().getFullYear()} Rentora Inc. All rights reserved.</p>
-          <div className="flex flex-wrap items-center gap-4 text-xs">
-            <Link href="/terms" className="hover:text-foreground">
-              Terms & Conditions
-            </Link>
-            <Link href="/privacy" className="hover:text-foreground">
-              Privacy Policy
-            </Link>
-            <Link href="/security" className="hover:text-foreground">
-              Security
-            </Link>
-            <Link href="/contact" className="hover:text-foreground">
-              Help Center
-            </Link>
-          </div>
+          
         </div>
       </div>
     </footer>
   )
 }
-

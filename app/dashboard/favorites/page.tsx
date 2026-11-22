@@ -23,7 +23,6 @@ import {
 } from "lucide-react"
 import { toast } from "react-toastify"
 
-import { AuthRouteGuard } from "@/components/auth-route-guard"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { useSession } from "@/lib/auth-client"
 import {
@@ -49,6 +48,11 @@ function formatDate(dateValue?: string | Date) {
   } catch {
     return String(dateValue)
   }
+}
+
+function formatCurrency(value?: number | string) {
+  const num = Number(value) || 0
+  return `৳${num.toLocaleString()}`
 }
 
 export default function FavoritesPage() {
@@ -163,8 +167,7 @@ export default function FavoritesPage() {
   ).length
 
   return (
-    <AuthRouteGuard>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -399,14 +402,14 @@ export default function FavoritesPage() {
                         {/* 2. Category */}
                         <td className="px-4 py-3.5">
                           <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
-                            {item.category}
+                            {item.category || "General"}
                           </span>
                         </td>
 
                         {/* 3. Rental Price */}
                         <td className="px-4 py-3.5">
                           <div className="font-semibold text-foreground">
-                            ${Number(item.rentalPrice).toLocaleString()}
+                            {formatCurrency(item.rentalPrice)}
                             <span className="ml-1 text-xs font-normal text-muted-foreground">
                               / {item.rentalType || "Daily"}
                             </span>
@@ -434,7 +437,7 @@ export default function FavoritesPage() {
                             />
                             <span className="text-xs font-medium text-foreground">
                               {inStock
-                                ? `${item.availableQuantity} available`
+                                ? `${Number(item.availableQuantity) || 0} in stock`
                                 : "Out of stock"}
                             </span>
                           </div>
@@ -509,7 +512,6 @@ export default function FavoritesPage() {
           />
         )}
       </div>
-    </AuthRouteGuard>
   )
 }
 
@@ -575,7 +577,7 @@ function FavoriteDetailsModal({
             <div className="flex flex-col justify-between space-y-3">
               <div>
                 <span className="inline-block rounded-md bg-secondary px-2.5 py-1 text-xs font-semibold text-secondary-foreground">
-                  {item.category}
+                  {item.category || "General"}
                 </span>
                 <h3 className="mt-2 text-xl font-bold text-foreground">
                   {item.equipmentName}
@@ -588,7 +590,7 @@ function FavoriteDetailsModal({
               <div className="rounded-xl bg-muted/60 p-3">
                 <span className="text-xs text-muted-foreground">Rental Rate</span>
                 <div className="text-2xl font-black text-foreground">
-                  ${Number(item.rentalPrice).toLocaleString()}
+                  {formatCurrency(item.rentalPrice)}
                   <span className="ml-1 text-xs font-medium text-muted-foreground">
                     / {item.rentalType || "Daily"}
                   </span>
@@ -610,7 +612,9 @@ function FavoriteDetailsModal({
                 <Layers className="size-3.5 text-primary" /> Units Available
               </span>
               <p className="font-medium text-foreground">
-                {item.availableQuantity || 1} units
+                {(Number(item.availableQuantity) || 0) > 0
+                  ? `${Number(item.availableQuantity)} units`
+                  : "Out of stock"}
               </p>
             </div>
             <div className="space-y-1">
@@ -659,7 +663,7 @@ function FavoriteDetailsModal({
               Close
             </Button>
             <Link
-              href={`/equipment/${item.equipmentId}`}
+              href={`/equipment/${item.equipmentId || item._id || item.id}`}
               className={cn(buttonVariants({ variant: "default", size: "sm" }))}
             >
               Rent Equipment

@@ -1,3 +1,6 @@
+"use client"
+
+import { AuthRouteGuard } from "@/components/auth-route-guard"
 import { DashboardShell } from "@/components/dashboard-shell"
 
 export default function DashboardLayout({
@@ -5,5 +8,9 @@ export default function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return <DashboardShell>{children}</DashboardShell>
+  return (
+    <AuthRouteGuard>
+      <DashboardShell>{children}</DashboardShell>
+    </AuthRouteGuard>
+  )
 }

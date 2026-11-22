@@ -25,7 +25,6 @@ import {
 } from "lucide-react"
 import { toast } from "react-toastify"
 
-import { AuthRouteGuard } from "@/components/auth-route-guard"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { useSession } from "@/lib/auth-client"
 import {
@@ -215,8 +214,7 @@ export default function MyRentalsPage() {
     .reduce((sum, r) => sum + (Number(r?.totalAmount) || 0), 0)
 
   return (
-    <AuthRouteGuard>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -542,7 +540,6 @@ export default function MyRentalsPage() {
           />
         )}
       </div>
-    </AuthRouteGuard>
   )
 }
 

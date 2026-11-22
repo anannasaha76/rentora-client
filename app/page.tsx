@@ -34,7 +34,12 @@ import {
 } from "lucide-react"
 
 import { Button, buttonVariants } from "@/components/ui/button"
-import { getFeaturedEquipment, type EquipmentListing } from "@/lib/equipment"
+import {
+  getFeaturedEquipment,
+  getRentalCategories,
+  type EquipmentListing,
+  type RentalCategory,
+} from "@/lib/equipment"
 import { useSession } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
@@ -43,57 +48,20 @@ function formatCurrency(amount?: number) {
   return `৳${val.toLocaleString()}`
 }
 
-// 6 Popular Categories
-const categories = [
-  {
-    title: "Construction Equipment",
-    description: "Excavators, concrete mixers, scaffoldings & compactors",
-    icon: HardHat,
-    color: "from-amber-500/20 to-amber-500/5 text-amber-600 dark:text-amber-400",
-    border: "border-amber-500/20",
-    count: "45+ Available",
-  },
-  {
-    title: "Photography Equipment",
-    description: "Cinema cameras, prime lenses, gimbals & studio lighting",
-    icon: Camera,
-    color: "from-sky-500/20 to-sky-500/5 text-sky-600 dark:text-sky-400",
-    border: "border-sky-500/20",
-    count: "60+ Available",
-  },
-  {
-    title: "Vehicles & Transportation",
-    description: "Pickup trucks, cargo vans, trailers & flatbeds",
-    icon: Truck,
-    color: "from-blue-500/20 to-blue-500/5 text-blue-600 dark:text-blue-400",
-    border: "border-blue-500/20",
-    count: "30+ Available",
-  },
-  {
-    title: "Agriculture Equipment",
-    description: "High-horsepower tractors, harvesters & irrigation pumps",
-    icon: Tractor,
-    color: "from-emerald-500/20 to-emerald-500/5 text-emerald-600 dark:text-emerald-400",
-    border: "border-emerald-500/20",
-    count: "35+ Available",
-  },
-  {
-    title: "Electronics",
-    description: "Heavy-duty sound systems, drone kits & testing tools",
-    icon: Cpu,
-    color: "from-purple-500/20 to-purple-500/5 text-purple-600 dark:text-purple-400",
-    border: "border-purple-500/20",
-    count: "50+ Available",
-  },
-  {
-    title: "Event Equipment",
-    description: "Stage setups, truss systems, industrial generators & lights",
-    icon: PartyPopper,
-    color: "from-rose-500/20 to-rose-500/5 text-rose-600 dark:text-rose-400",
-    border: "border-rose-500/20",
-    count: "40+ Available",
-  },
-]
+// Dynamic Category Icon Resolver
+function getCategoryIcon(title: string) {
+  const t = (title || "").toLowerCase()
+  if (t.includes("construct") || t.includes("loader") || t.includes("crane")) return HardHat
+  if (t.includes("photo") || t.includes("camera") || t.includes("video")) return Camera
+  if (t.includes("vehicle") || t.includes("transport") || t.includes("truck") || t.includes("forklift")) return Truck
+  if (t.includes("agri") || t.includes("farm") || t.includes("tractor")) return Tractor
+  if (t.includes("electr") || t.includes("sound") || t.includes("audio") || t.includes("drone")) return Cpu
+  if (t.includes("event") || t.includes("party") || t.includes("stage")) return PartyPopper
+  if (t.includes("tool") || t.includes("drill") || t.includes("wrench")) return Wrench
+  if (t.includes("excavat")) return HardHat
+  if (t.includes("generat")) return Sparkles
+  return Package
+}
 
 // Why Choose Us Benefits
 const platformBenefits = [
@@ -210,6 +178,9 @@ export default function HomePage() {
   const [featuredEquipment, setFeaturedEquipment] = React.useState<EquipmentListing[]>([])
   const [loadingFeatured, setLoadingFeatured] = React.useState(true)
 
+  const [categories, setCategories] = React.useState<RentalCategory[]>([])
+  const [loadingCategories, setLoadingCategories] = React.useState(true)
+
   React.useEffect(() => {
     async function loadFeatured() {
       try {
@@ -221,7 +192,20 @@ export default function HomePage() {
         setLoadingFeatured(false)
       }
     }
+
+    async function loadCategories() {
+      try {
+        const cats = await getRentalCategories()
+        setCategories(cats)
+      } catch (err) {
+        console.error("Failed to load dynamic categories on homepage:", err)
+      } finally {
+        setLoadingCategories(false)
+      }
+    }
+
     loadFeatured()
+    loadCategories()
   }, [])
 
   // Handle View Details: If user not logged in -> redirect to /login?callbackUrl=...
@@ -382,16 +366,19 @@ export default function HomePage() {
             Array.from({ length: 6 }).map((_, idx) => (
               <div
                 key={idx}
-                className="overflow-hidden rounded-2xl border border-border/70 bg-card p-4 animate-pulse space-y-4"
+                className="flex flex-col overflow-hidden rounded-3xl border border-border/60 bg-card p-4 space-y-4 animate-pulse"
               >
-                <div className="h-48 w-full rounded-xl bg-muted" />
-                <div className="h-5 w-3/4 rounded bg-muted" />
-                <div className="h-4 w-1/2 rounded bg-muted/60" />
-                <div className="h-8 w-full rounded-lg bg-muted" />
+                <div className="aspect-16/10 w-full rounded-2xl bg-muted" />
+                <div className="space-y-2 p-2">
+                  <div className="h-4 w-28 rounded-md bg-muted" />
+                  <div className="h-5 w-3/4 rounded-md bg-muted" />
+                  <div className="h-3.5 w-full rounded-md bg-muted/60" />
+                  <div className="h-14 w-full rounded-2xl bg-muted/50 mt-4" />
+                </div>
               </div>
             ))
           ) : featuredEquipment.length === 0 ? (
-            <div className="col-span-full rounded-2xl border border-border bg-card p-12 text-center">
+            <div className="col-span-full rounded-3xl border border-border bg-card p-12 text-center">
               <Package className="mx-auto size-12 text-muted-foreground" />
               <h3 className="mt-4 text-lg font-bold text-foreground">
                 No Featured Equipment Listed
@@ -403,17 +390,19 @@ export default function HomePage() {
           ) : (
             featuredEquipment.map((item, index) => {
               const id = item._id || item.id || ""
+              const hasStock = (item.availableQuantity ?? 1) > 0
+
               return (
                 <motion.div
                   key={id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  whileHover={{ y: -4 }}
-                  className="group flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs transition-all hover:border-primary/40 hover:shadow-xl"
+                  transition={{ duration: 0.4, delay: index * 0.08 }}
+                  whileHover={{ y: -6 }}
+                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-border/70 bg-card shadow-xs transition-all duration-300 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5"
                 >
-                  {/* Equipment Thumbnail Image */}
+                  {/* Equipment Thumbnail Image with Overlays */}
                   <div className="relative aspect-16/10 w-full overflow-hidden bg-muted">
                     {item.image ? (
                       <Image
@@ -421,81 +410,109 @@ export default function HomePage() {
                         alt={item.equipmentName}
                         fill
                         unoptimized
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="object-cover transition-transform duration-700 ease-out group-hover:scale-108"
                       />
                     ) : (
-                      <div className="flex size-full items-center justify-center text-muted-foreground">
+                      <div className="flex size-full items-center justify-center bg-muted/60 text-muted-foreground">
                         <Package className="size-10" />
                       </div>
                     )}
-                    {/* Category Badge */}
-                    <span className="absolute top-3 left-3 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur-xs shadow-xs">
-                      {item.category || "General"}
+
+                    {/* Gradient Overlay for Legibility */}
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+                    {/* Top Left: Category Pill */}
+                    <span className="absolute top-3.5 left-3.5 inline-flex items-center gap-1.5 rounded-full bg-background/90 dark:bg-card/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur-md shadow-xs border border-white/20 dark:border-border/40">
+                      <span className="size-1.5 rounded-full bg-primary" />
+                      <span>{item.category || "General"}</span>
                     </span>
-                    {/* Condition Badge */}
-                    {item.equipmentCondition && (
-                      <span className="absolute top-3 right-3 rounded-full bg-primary/90 px-2.5 py-0.5 text-[11px] font-semibold text-primary-foreground backdrop-blur-xs shadow-xs">
-                        {item.equipmentCondition}
-                      </span>
-                    )}
-                  </div>
 
-                  {/* Equipment Details Content */}
-                  <div className="flex flex-1 flex-col p-5">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3
-                        className="font-bold text-foreground line-clamp-1 text-lg group-hover:text-primary transition-colors"
-                        title={item.equipmentName}
-                      >
-                        {item.equipmentName}
-                      </h3>
-                    </div>
+                    {/* Top Right: Condition / Verified Badge */}
+                    <span className="absolute top-3.5 right-3.5 inline-flex items-center gap-1 rounded-full bg-primary/95 px-2.5 py-1 text-[11px] font-bold text-primary-foreground backdrop-blur-md shadow-xs">
+                      <ShieldCheck className="size-3" />
+                      <span>{item.equipmentCondition || "Verified"}</span>
+                    </span>
 
-                    {(item.brand || item.model) && (
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        {[item.brand, item.model].filter(Boolean).join(" • ")}
-                      </p>
-                    )}
-
-                    {/* Location & Stock */}
-                    <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="size-3.5 text-primary shrink-0" />
-                        <span className="truncate max-w-[140px]">{item.location || "Bangladesh"}</span>
+                    {/* Bottom Floating Bar inside Image: Location & Stock */}
+                    <div className="absolute inset-x-3.5 bottom-3 flex items-center justify-between text-[11px] font-medium text-white/95">
+                      <div className="flex items-center gap-1 rounded-full bg-black/45 px-2.5 py-1 backdrop-blur-md border border-white/10">
+                        <MapPin className="size-3 text-emerald-400 shrink-0" />
+                        <span className="truncate max-w-[120px]">{item.location || "Bangladesh"}</span>
                       </div>
-                      <div className="flex items-center gap-1 font-medium text-foreground">
+
+                      <div className="flex items-center gap-1.5 rounded-full bg-black/45 px-2.5 py-1 backdrop-blur-md border border-white/10">
                         <span
                           className={cn(
                             "size-2 rounded-full",
-                            (item.availableQuantity ?? 1) > 0 ? "bg-emerald-500" : "bg-rose-500"
+                            hasStock
+                              ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
+                              : "bg-rose-400"
                           )}
                         />
-                        <span>{item.availableQuantity ?? 1} in stock</span>
+                        <span>{hasStock ? `${item.availableQuantity} in stock` : "Out of stock"}</span>
                       </div>
                     </div>
+                  </div>
 
-                    <div className="my-4 border-t border-border/70" />
+                  {/* Card Content Body */}
+                  <div className="flex flex-1 flex-col p-5 sm:p-6">
+                    {/* Brand / Model / Spec subtitle */}
+                    {(item.brand || item.model) ? (
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                        {[item.brand, item.model].filter(Boolean).join(" • ")}
+                      </p>
+                    ) : (
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Verified Listing
+                      </p>
+                    )}
 
-                    {/* Pricing & View Details Button */}
-                    <div className="mt-auto flex items-center justify-between">
+                    {/* Equipment Name */}
+                    <h3
+                      className="mt-1 text-lg font-bold tracking-tight text-foreground transition-colors group-hover:text-primary line-clamp-1"
+                      title={item.equipmentName}
+                    >
+                      {item.equipmentName}
+                    </h3>
+
+                    {/* Description preview */}
+                    <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                      {item.description || "Inspected industrial-grade equipment ready for commercial or personal rental."}
+                    </p>
+
+                    {/* Owner trust indicator */}
+                    <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1 text-[11px] font-medium">
+                        <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <span>Instant Booking</span>
+                      </span>
+                      <span className="text-[11px] font-medium text-muted-foreground capitalize">
+                        {item.rentalType || "Daily"} Plan
+                      </span>
+                    </div>
+
+                    {/* Pricing & CTA Card Row */}
+                    <div className="mt-4 flex items-center justify-between rounded-2xl border border-border/50 bg-muted/40 p-3.5 transition-colors group-hover:border-primary/20 group-hover:bg-accent/40">
                       <div>
-                        <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                          Rate
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Rental Rate
                         </p>
-                        <p className="text-xl font-extrabold text-foreground">
-                          {formatCurrency(item.rentalPrice)}
-                          <span className="text-xs font-normal text-muted-foreground">
-                            {" "}/ {item.rentalType || "day"}
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-xl font-black tracking-tight text-foreground">
+                            {formatCurrency(item.rentalPrice)}
                           </span>
-                        </p>
+                          <span className="text-xs font-medium text-muted-foreground">
+                            /{item.rentalType ? item.rentalType.toLowerCase() : "day"}
+                          </span>
+                        </div>
                       </div>
 
                       <Button
                         onClick={() => handleViewDetails(id)}
-                        className="gap-1.5 shadow-xs"
+                        className="gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold shadow-xs transition-all hover:gap-2"
                       >
                         <span>View Details</span>
-                        <ArrowRight className="size-3.5" />
+                        <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
                       </Button>
                     </div>
                   </div>
@@ -523,54 +540,87 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Categories Grid */}
-        <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((cat, index) => {
-            const Icon = cat.icon
-            return (
-              <motion.div
-                key={cat.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.08 }}
-                whileHover={{ scale: 1.02 }}
+        {/* Categories Grid (Dynamic with Skeleton Loading & Framer Motion) */}
+        {loadingCategories ? (
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex h-52 flex-col justify-between rounded-2xl border border-border/60 bg-muted/30 p-6 animate-pulse"
               >
-                <Link
-                  href={`/equipment?category=${encodeURIComponent(cat.title)}`}
-                  className={cn(
-                    "group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-gradient-to-br p-6 shadow-xs transition-all hover:shadow-lg",
-                    cat.border,
-                    cat.color
-                  )}
+                <div className="flex items-start justify-between">
+                  <div className="size-12 rounded-2xl bg-muted" />
+                  <div className="h-5 w-24 rounded-full bg-muted" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-5 w-2/3 rounded-md bg-muted" />
+                  <div className="h-3.5 w-full rounded-md bg-muted" />
+                  <div className="h-3.5 w-4/5 rounded-md bg-muted" />
+                </div>
+                <div className="h-4 w-1/3 rounded-md bg-muted" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {categories.map((cat, index) => {
+              const Icon = getCategoryIcon(cat.title)
+              return (
+                <motion.div
+                  key={cat.title || cat.name || index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.06 }}
+                  whileHover={{ scale: 1.02 }}
                 >
-                  <div className="flex items-start justify-between">
-                    <span className="flex size-12 items-center justify-center rounded-2xl bg-background/80 shadow-xs backdrop-blur-xs">
-                      <Icon className="size-6" />
-                    </span>
-                    <span className="rounded-full bg-background/80 px-2.5 py-1 text-[11px] font-semibold text-foreground backdrop-blur-xs">
-                      {cat.count}
-                    </span>
-                  </div>
+                  <Link
+                    href={`/equipment?category=${encodeURIComponent(cat.title)}`}
+                    className={cn(
+                      "group relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-gradient-to-br p-6 shadow-xs transition-all hover:shadow-lg",
+                      cat.border || "border-primary/20",
+                      cat.color || "from-primary/20 to-primary/5 text-primary"
+                    )}
+                  >
+                    <div className="flex items-start justify-between">
+                      <span className="flex size-12 items-center justify-center rounded-2xl bg-background/80 shadow-xs backdrop-blur-xs">
+                        <Icon className="size-6" />
+                      </span>
+                      <span className="rounded-full bg-background/80 px-2.5 py-1 text-[11px] font-semibold text-foreground backdrop-blur-xs">
+                        {cat.count ||
+                          (cat.totalListings
+                            ? `${cat.totalListings} Listing${cat.totalListings === 1 ? "" : "s"}`
+                            : "Available for Rent")}
+                      </span>
+                    </div>
 
-                  <div className="mt-6">
-                    <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
-                      {cat.title}
-                    </h3>
-                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                      {cat.description}
-                    </p>
-                  </div>
+                    <div className="mt-6">
+                      <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+                        {cat.title}
+                      </h3>
+                      <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                        {cat.description || "Professional equipment and machinery available for immediate booking."}
+                      </p>
+                    </div>
 
-                  <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-foreground group-hover:text-primary">
-                    <span>Browse {cat.title}</span>
-                    <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
-                  </div>
-                </Link>
-              </motion.div>
-            )
-          })}
-        </div>
+                    <div className="mt-4 flex items-center justify-between text-xs">
+                      <span className="font-semibold text-foreground group-hover:text-primary flex items-center gap-1">
+                        <span>Browse {cat.title}</span>
+                        <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-1" />
+                      </span>
+
+                      {cat.minPrice && cat.minPrice > 0 ? (
+                        <span className="text-[11px] font-medium text-muted-foreground">
+                          From {formatCurrency(cat.minPrice)}/day
+                        </span>
+                      ) : null}
+                    </div>
+                  </Link>
+                </motion.div>
+              )
+            })}
+          </div>
+        )}
       </section>
 
       {/* =====================================================================
@@ -772,19 +822,13 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col lg:items-end justify-center">
+            <div className="flex justify-center lg:justify-end">
               <Link
                 href="/dashboard/add-equipment"
                 className={cn(buttonVariants({ size: "lg" }), "gap-2 shadow-lg")}
               >
                 <PlusCircle className="size-4" />
                 <span>Start Listing Today</span>
-              </Link>
-              <Link
-                href="/how-it-works"
-                className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
-              >
-                Learn Owner Terms
               </Link>
             </div>
           </div>

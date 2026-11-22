@@ -1,3 +1,5 @@
+import { getAuthHeader } from "@/lib/jwt"
+
 export type PaymentStatus = "Paid" | "Unpaid" | "Pending" | "Refunded"
 export type BookingStatus =
   | "Pending"
@@ -59,7 +61,10 @@ export async function getOwnerRentals(
 
   const res = await fetch(`${equipmentApiUrl}/api/rentals/owner?${query.toString()}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeader(),
+    },
     cache: "no-store",
   })
 
@@ -81,7 +86,10 @@ export async function getCustomerRentals(
 
   const res = await fetch(`${equipmentApiUrl}/api/rentals/customer?${query.toString()}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeader(),
+    },
     cache: "no-store",
   })
 
@@ -249,7 +257,10 @@ export async function getAllRentals(options?: {
   const queryString = query.toString() ? `?${query.toString()}` : ""
   const res = await fetch(`${equipmentApiUrl}/api/rentals${queryString}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeader(),
+    },
     cache: "no-store",
   })
 
@@ -274,7 +285,10 @@ export async function manageRental(
 ): Promise<{ message: string; rental: RentalBooking }> {
   const res = await fetch(`${equipmentApiUrl}/api/rentals/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeader(),
+    },
     body: JSON.stringify(updates),
   })
 
@@ -289,7 +303,10 @@ export async function manageRental(
 export async function deleteRental(id: string): Promise<{ message: string }> {
   const res = await fetch(`${equipmentApiUrl}/api/rentals/${id}`, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeader(),
+    },
   })
 
   const data = await res.json().catch(() => null)

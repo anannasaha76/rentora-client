@@ -5,6 +5,7 @@ import Link from "next/link"
 import { AlertTriangle, ChevronDown, ChevronUp, Home, RefreshCw } from "lucide-react"
 
 import { Button, buttonVariants } from "@/components/ui/button"
+import { RentoraLogo } from "@/components/logo"
 import { cn } from "@/lib/utils"
 
 export default function ErrorPage({
@@ -24,6 +25,11 @@ export default function ErrorPage({
   return (
     <div className="flex min-h-[70vh] w-full flex-col items-center justify-center px-4 py-16">
       <div className="w-full max-w-md rounded-2xl border border-destructive/20 bg-card p-6 text-center shadow-lg sm:p-8">
+        {/* Brand Logo */}
+        <div className="mb-6 flex justify-center">
+          <RentoraLogo size="sm" href="/" />
+        </div>
+
         {/* Warning Icon Badge */}
         <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
           <AlertTriangle className="size-7" />

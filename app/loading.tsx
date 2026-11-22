@@ -1,3 +1,5 @@
+import { RentoraIcon } from "@/components/logo"
+
 export default function Loading() {
   return (
     <div className="flex min-h-[70vh] w-full flex-col items-center justify-center px-4 py-16">
@@ -6,9 +8,7 @@ export default function Loading() {
         <div className="relative flex size-20 items-center justify-center">
           <div className="absolute size-20 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
           <div className="absolute size-14 animate-pulse rounded-full bg-primary/10" />
-          <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-base font-bold text-primary-foreground shadow-md">
-            R
-          </span>
+          <RentoraIcon size={38} className="relative z-10 drop-shadow-md" />
         </div>
 
         {/* Brand & Loading Indicator */}

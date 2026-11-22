@@ -2,12 +2,18 @@ import Link from "next/link"
 import { Home, Package } from "lucide-react"
 
 import { buttonVariants } from "@/components/ui/button"
+import { RentoraLogo } from "@/components/logo"
 import { cn } from "@/lib/utils"
 
 export default function NotFound() {
   return (
     <div className="flex min-h-[70vh] w-full flex-col items-center justify-center px-4 py-16">
       <div className="w-full max-w-md rounded-2xl border border-border/80 bg-card p-6 text-center shadow-lg sm:p-8">
+        {/* Brand Logo */}
+        <div className="mb-6 flex justify-center">
+          <RentoraLogo size="sm" href="/" />
+        </div>
+
         {/* 404 Visual */}
         <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <span className="text-2xl font-black">404</span>

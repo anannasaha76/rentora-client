@@ -1,3 +1,5 @@
+import { getAuthHeader } from "@/lib/jwt"
+
 export type RentalType = "Daily" | "Weekly" | "Monthly"
 export type EquipmentStatus = "Pending" | "Approved" | "Rejected"
 
@@ -83,7 +85,10 @@ export async function getOwnerEquipment(
 
   const res = await fetch(`${equipmentApiUrl}/api/equipment/owner?${query.toString()}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeader(),
+    },
     cache: "no-store",
   })
 
@@ -117,7 +122,10 @@ export async function updateEquipment(
 ): Promise<{ message: string; equipment: EquipmentListing }> {
   const res = await fetch(`${equipmentApiUrl}/api/equipment/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeader(),
+    },
     body: JSON.stringify(updates),
   })
 
@@ -134,7 +142,10 @@ export async function deleteEquipment(
 ): Promise<{ message: string; id: string }> {
   const res = await fetch(`${equipmentApiUrl}/api/equipment/${id}`, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeader(),
+    },
   })
 
   const data = await res.json().catch(() => null)
@@ -215,7 +226,10 @@ export async function updateEquipmentStatus(
 ): Promise<{ message: string; equipment: EquipmentListing }> {
   const res = await fetch(`${equipmentApiUrl}/api/equipment/${id}/status`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeader(),
+    },
     body: JSON.stringify({ status }),
   })
 
@@ -247,5 +261,101 @@ export async function getFeaturedEquipment(): Promise<EquipmentListing[]> {
     const fallback = await getAllEquipment({ status: "Approved", limit: 6 })
     return fallback.equipment.slice(0, 6)
   }
+}
+
+export type RentalCategory = {
+  title: string
+  name: string
+  totalListings: number
+  availableQuantity: number
+  minPrice?: number
+  sampleImage?: string
+  description?: string
+  color?: string
+  border?: string
+  count?: string
+}
+
+export async function getRentalCategories(): Promise<RentalCategory[]> {
+  try {
+    const res = await fetch(`${equipmentApiUrl}/api/equipment/categories`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    })
+
+    if (res.ok) {
+      const data = await res.json()
+      if (Array.isArray(data) && data.length > 0) {
+        return data
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to fetch dynamic categories from API, using fallback defaults:", err)
+  }
+
+  // Graceful fallback if server unavailable
+  return [
+    {
+      title: "Construction Equipment",
+      name: "Construction Equipment",
+      totalListings: 45,
+      availableQuantity: 45,
+      description: "Excavators, concrete mixers, scaffoldings & compactors",
+      color: "from-amber-500/20 to-amber-500/5 text-amber-600 dark:text-amber-400",
+      border: "border-amber-500/20",
+      count: "45+ Available",
+    },
+    {
+      title: "Photography Equipment",
+      name: "Photography Equipment",
+      totalListings: 60,
+      availableQuantity: 60,
+      description: "Cinema cameras, prime lenses, gimbals & studio lighting",
+      color: "from-sky-500/20 to-sky-500/5 text-sky-600 dark:text-sky-400",
+      border: "border-sky-500/20",
+      count: "60+ Available",
+    },
+    {
+      title: "Vehicles & Transportation",
+      name: "Vehicles & Transportation",
+      totalListings: 30,
+      availableQuantity: 30,
+      description: "Pickup trucks, cargo vans, trailers & flatbeds",
+      color: "from-blue-500/20 to-blue-500/5 text-blue-600 dark:text-blue-400",
+      border: "border-blue-500/20",
+      count: "30+ Available",
+    },
+    {
+      title: "Agriculture Equipment",
+      name: "Agriculture Equipment",
+      totalListings: 35,
+      availableQuantity: 35,
+      description: "High-horsepower tractors, harvesters & irrigation pumps",
+      color: "from-emerald-500/20 to-emerald-500/5 text-emerald-600 dark:text-emerald-400",
+      border: "border-emerald-500/20",
+      count: "35+ Available",
+    },
+    {
+      title: "Electronics",
+      name: "Electronics",
+      totalListings: 50,
+      availableQuantity: 50,
+      description: "Heavy-duty sound systems, drone kits & testing tools",
+      color: "from-purple-500/20 to-purple-500/5 text-purple-600 dark:text-purple-400",
+      border: "border-purple-500/20",
+      count: "50+ Available",
+    },
+    {
+      title: "Event Equipment",
+      name: "Event Equipment",
+      totalListings: 40,
+      availableQuantity: 40,
+      description: "Stage setups, truss systems, industrial generators & lights",
+      color: "from-rose-500/20 to-rose-500/5 text-rose-600 dark:text-rose-400",
+      border: "border-rose-500/20",
+      count: "40+ Available",
+    },
+  ]
 }
 

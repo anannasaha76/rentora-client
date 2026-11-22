@@ -6,6 +6,7 @@ import * as React from "react"
 
 import { buttonVariants } from "@/components/ui/button"
 import { useSession } from "@/lib/auth-client"
+import { getAccessToken, generateJwtAccessToken } from "@/lib/jwt"
 import { cn } from "@/lib/utils"
 
 export function AuthRouteGuard({
@@ -17,13 +18,31 @@ export function AuthRouteGuard({
 }) {
   const router = useRouter()
   const { data: session, isPending } = useSession()
+  // Track whether we have ever successfully loaded a session check.
+  // This prevents premature redirects on page reload when the session
+  // cookie exists but the fetch hasn't completed yet.
+  const [hasChecked, setHasChecked] = React.useState(false)
 
   React.useEffect(() => {
+    // Don't act until the session query has fully settled
     if (isPending) return
+
+    // Mark that we've completed at least one check
+    setHasChecked(true)
 
     if (!session) {
       router.replace("/login")
       return
+    }
+
+    // Ensure JWT access token is active and valid for the session
+    if (!getAccessToken() && session.user?.email) {
+      generateJwtAccessToken({
+        email: session.user.email,
+        id: session.user.id,
+        name: session.user.name,
+        role: session.user.role,
+      }).catch(() => {})
     }
 
     if (
@@ -35,10 +54,15 @@ export function AuthRouteGuard({
     }
   }, [isPending, router, session, allowedRoles])
 
-  if (isPending) {
+  // Show loading state while session is being fetched OR before the first
+  // check completes. This prevents the "Sign in required" flash on reload.
+  if (isPending || !hasChecked) {
     return (
       <div className="mx-auto flex min-h-[50vh] max-w-6xl items-center justify-center px-4 sm:px-6">
-        <p className="text-sm text-muted-foreground">Checking authentication...</p>
+        <div className="flex flex-col items-center gap-3">
+          <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
       </div>
     )
   }
@@ -91,4 +115,3 @@ export function AuthRouteGuard({
 
   return <>{children}</>
 }
-

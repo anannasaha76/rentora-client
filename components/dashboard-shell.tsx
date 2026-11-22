@@ -15,7 +15,9 @@ import { usePathname, useRouter } from "next/navigation"
 import * as React from "react"
 
 import { Button } from "@/components/ui/button"
+import { RentoraIcon, RentoraLogo } from "@/components/logo"
 import { signOut, useSession } from "@/lib/auth-client"
+import { removeAccessToken } from "@/lib/jwt"
 import { cn } from "@/lib/utils"
 
 const ownerLinks = [
@@ -52,6 +54,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = React.useState(false)
 
   async function handleLogout() {
+    removeAccessToken()
     await signOut()
     setMobileOpen(false)
     router.push("/")
@@ -62,23 +65,24 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const links =
     role === "owner" ? ownerLinks : role === "admin" ? adminLinks : customerLinks
 
-  const dashboardTitle =
-    role === "owner"
-      ? "Owner dashboard"
-      : role === "admin"
-      ? "Admin dashboard"
-      : "Customer dashboard"
-
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row">
       <aside className="lg:w-60 lg:shrink-0">
+        {/* Brand Header for Desktop Sidebar */}
+        <div className="mb-5 hidden items-center px-1 lg:flex">
+          <RentoraLogo size="sm" href="/" withTagline />
+        </div>
+
         <Button
           variant="outline"
           className="w-full justify-between lg:hidden"
           onClick={() => setMobileOpen((value) => !value)}
           aria-expanded={mobileOpen}
         >
-          Dashboard menu
+          <span className="flex items-center gap-2 font-medium">
+            <RentoraIcon size={18} />
+            <span>Dashboard menu</span>
+          </span>
           <span className="text-xs text-muted-foreground">
             {mobileOpen ? "Hide" : "Show"}
           </span>
@@ -114,18 +118,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <div className="min-w-0 flex-1 space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-4 text-card-foreground shadow-sm">
-          <div>
-            <p className="text-xs text-muted-foreground">{dashboardTitle}</p>
-            <p className="text-sm font-medium">
-              {session?.user?.name || session?.user?.email || "User"}
-            </p>
-          </div>
-          <Button variant="outline" className="hidden lg:inline-flex" onClick={handleLogout}>
-            Logout
-          </Button>
-        </div>
+      <div className="min-w-0 flex-1">
         {children}
       </div>
     </div>
