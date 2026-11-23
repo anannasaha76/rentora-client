@@ -21,7 +21,7 @@ import {
 import { toast } from "react-toastify"
 
 import { Button } from "@/components/ui/button"
-import { useSession } from "@/lib/auth-client"
+import { useSession, updateUser } from "@/lib/auth-client"
 import { getUserProfile, updateUserProfile, type UserProfile } from "@/lib/user"
 import { cn } from "@/lib/utils"
 
@@ -165,6 +165,26 @@ export default function MyProfilePage() {
 
       const res = await updateUserProfile(sessionEmail, payload)
       setProfile((prev) => (prev ? { ...prev, ...res.user } : res.user))
+
+      // Also update Better Auth client session so other components (e.g. Navbar) update immediately
+      try {
+        await updateUser({
+          name: name.trim(),
+          image: image.trim(),
+        })
+      } catch (authUpdateErr) {
+        console.warn("Could not sync Better Auth session:", authUpdateErr)
+      }
+
+      // Dispatch custom event for immediate global navbar sync
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("rentora:profile-updated", {
+            detail: { name: name.trim(), image: image.trim() },
+          })
+        )
+      }
+
       toast.success("Profile updated successfully.")
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to update profile.")

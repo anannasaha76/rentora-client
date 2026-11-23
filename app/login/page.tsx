@@ -47,6 +47,14 @@ export default function LoginPage() {
     return "/"
   }
 
+  function getGoogleCallbackUrl() {
+    const targetUrl = getCallbackUrl()
+    const [path, search] = targetUrl.split("?")
+    const searchParams = new URLSearchParams(search || "")
+    searchParams.set("auth_status", "google_login_success")
+    return `${path}?${searchParams.toString()}`
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
 
@@ -85,7 +93,7 @@ export default function LoginPage() {
     try {
       await signIn.social({
         provider: "google",
-        callbackURL: getCallbackUrl(),
+        callbackURL: getGoogleCallbackUrl(),
       })
     } catch {
       toast.error("Google login failed. Please try again.")

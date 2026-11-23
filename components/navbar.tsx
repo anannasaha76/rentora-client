@@ -12,11 +12,13 @@ import {
   UserPlus,
   LogOut,
   ArrowRight,
+  User,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { RentoraLogo } from "@/components/logo"
 import { signOut, useSession } from "@/lib/auth-client"
+import { getUserProfile } from "@/lib/user"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -30,10 +32,61 @@ const navLinks = [
 export function Navbar() {
   const [open, setOpen] = React.useState(false)
   const [loggingOut, setLoggingOut] = React.useState(false)
+  const [liveUser, setLiveUser] = React.useState<{ name?: string; image?: string } | null>(null)
 
   const router = useRouter()
   const pathname = usePathname()
   const { data: session } = useSession()
+
+  const sessionEmail = session?.user?.email || ""
+
+  // Fetch latest user profile from backend on mount or when email changes
+  React.useEffect(() => {
+    if (!sessionEmail) {
+      setLiveUser(null)
+      return
+    }
+
+    let isMounted = true
+    getUserProfile(sessionEmail)
+      .then((data) => {
+        if (isMounted && data) {
+          setLiveUser({
+            name: data.name,
+            image: data.image,
+          })
+        }
+      })
+      .catch(() => {
+        // Fallback silently to session user
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [sessionEmail])
+
+  // Listen for instant profile update events emitted when profile is saved
+  React.useEffect(() => {
+    function handleProfileUpdated(event: Event) {
+      const customEvent = event as CustomEvent<{ name?: string; image?: string }>
+      if (customEvent.detail) {
+        setLiveUser((prev) => ({
+          ...prev,
+          name: customEvent.detail.name,
+          image: customEvent.detail.image,
+        }))
+      }
+    }
+
+    window.addEventListener("rentora:profile-updated", handleProfileUpdated)
+    return () => {
+      window.removeEventListener("rentora:profile-updated", handleProfileUpdated)
+    }
+  }, [])
+
+  const displayName = liveUser?.name || session?.user?.name || "User"
+  const displayImage = liveUser?.image !== undefined ? liveUser.image : session?.user?.image
 
   React.useEffect(() => {
     setOpen(false)
@@ -107,9 +160,44 @@ export function Navbar() {
         </nav>
 
         {/* Desktop Authentication */}
-        <div className="hidden items-center gap-2.5 lg:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           {session ? (
             <>
+              {/* Logged in User Profile Info (Avatar & Name) */}
+              <Link
+                href="/dashboard/my-profile"
+                className="group flex items-center gap-2.5 rounded-lg border border-transparent p-1.5 transition-colors hover:border-gray-200 hover:bg-gray-50"
+                title="View Profile"
+              >
+                <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800">
+                  {displayImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={displayImage}
+                      src={displayImage}
+                      alt={displayName}
+                      className="size-full object-cover"
+                      onError={(e) => {
+                        ;(e.target as HTMLElement).style.display = "none"
+                      }}
+                    />
+                  ) : (
+                    <span className="text-sm font-bold">
+                      {displayName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-col text-left">
+                  <span className="max-w-[130px] truncate text-xs font-semibold text-gray-900 group-hover:text-emerald-700">
+                    {displayName}
+                  </span>
+                  <span className="max-w-[130px] truncate text-[11px] capitalize text-gray-500">
+                    {(session.user as { role?: string })?.role || "Member"}
+                  </span>
+                </div>
+              </Link>
+
               <Link href="/dashboard" className={dashboardButtonClass}>
                 <LayoutDashboard size={17} />
                 Dashboard
@@ -187,9 +275,42 @@ export function Navbar() {
             </div>
 
             {/* Mobile Authentication */}
-            <div className="mt-5 flex flex-col gap-2 border-t border-gray-100 pt-5">
+            <div className="mt-5 flex flex-col gap-2.5 border-t border-gray-100 pt-5">
               {session ? (
                 <>
+                  <Link
+                    href="/dashboard/my-profile"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50/70 p-3 text-left transition-colors hover:bg-gray-100"
+                  >
+                    <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-emerald-200 bg-emerald-100/70 text-emerald-800">
+                      {displayImage ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          key={displayImage}
+                          src={displayImage}
+                          alt={displayName}
+                          className="size-full object-cover"
+                          onError={(e) => {
+                            ;(e.target as HTMLElement).style.display = "none"
+                          }}
+                        />
+                      ) : (
+                        <span className="text-sm font-bold">
+                          {displayName.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="truncate text-sm font-semibold text-gray-900">
+                        {displayName}
+                      </span>
+                      <span className="truncate text-xs text-gray-500">
+                        {session.user?.email}
+                      </span>
+                    </div>
+                  </Link>
+
                   <Link
                     href="/dashboard"
                     onClick={() => setOpen(false)}

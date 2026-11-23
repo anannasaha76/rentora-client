@@ -162,7 +162,7 @@ export default function RegisterPage() {
     try {
       await signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: "/?auth_status=google_register_success",
       })
     } catch {
       toast.error("Google sign-up failed.")

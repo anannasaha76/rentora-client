@@ -30,7 +30,6 @@ import {
   getOwnerRentals,
   type PaymentStatus,
   type RentalBooking,
-  updateRentalStatus,
 } from "@/lib/rental"
 import { cn } from "@/lib/utils"
 
@@ -125,7 +124,6 @@ export default function MyEquipmentRentalPage() {
 
   // Modal for viewing full booking details
   const [viewRental, setViewRental] = React.useState<RentalBooking | null>(null)
-  const [updatingId, setUpdatingId] = React.useState<string | null>(null)
 
   const ownerEmail = session?.user?.email || ""
   const ownerId = session?.user?.id || ""
@@ -168,27 +166,6 @@ export default function MyEquipmentRentalPage() {
       document.body.style.overflow = ""
     }
   }, [viewRental])
-
-  // Handle status update
-  async function handleStatusChange(rentalId: string, newStatus: BookingStatus) {
-    setUpdatingId(rentalId)
-    try {
-      const res = await updateRentalStatus(rentalId, { bookingStatus: newStatus })
-      setRentals((prev) =>
-        (prev || []).map((r) =>
-          (r._id || r.id) === rentalId ? { ...r, ...res.rental } : r
-        )
-      )
-      if (viewRental && (viewRental._id || viewRental.id) === rentalId) {
-        setViewRental((prev) => (prev ? { ...prev, bookingStatus: newStatus } : null))
-      }
-      toast.success(`Booking status updated to ${newStatus}.`)
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update booking status.")
-    } finally {
-      setUpdatingId(null)
-    }
-  }
 
   // Filtered rentals
   const filteredRentals = React.useMemo(() => {
@@ -279,7 +256,7 @@ export default function MyEquipmentRentalPage() {
               <span className="text-xs font-medium">Total Paid Revenue</span>
               <DollarSign className="size-4" />
             </div>
-            <p className="mt-2 text-2xl font-bold">${totalRevenue.toLocaleString()}</p>
+            <p className="mt-2 text-2xl font-bold">৳{totalRevenue.toLocaleString()}</p>
           </div>
         </div>
 
@@ -432,7 +409,6 @@ export default function MyEquipmentRentalPage() {
                 <tbody className="divide-y divide-border">
                   {(filteredRentals || []).map((rental) => {
                     const id = rental._id || rental.id || ""
-                    const isUpdating = updatingId === id
 
                     return (
                       <tr key={id} className="transition-colors hover:bg-muted/40">
@@ -529,7 +505,7 @@ export default function MyEquipmentRentalPage() {
                         {/* 5. Booking Amount */}
                         <td className="px-4 py-3.5">
                           <div className="font-bold text-foreground">
-                            ${Number(rental.totalAmount || 0).toLocaleString()}
+                            ৳{Number(rental.totalAmount || 0).toLocaleString()}
                           </div>
                         </td>
 
@@ -540,26 +516,7 @@ export default function MyEquipmentRentalPage() {
 
                         {/* 7. Booking Status */}
                         <td className="px-4 py-3.5">
-                          <div className="flex items-center gap-2">
-                            <select
-                              value={rental.bookingStatus || "Pending"}
-                              onChange={(e) =>
-                                handleStatusChange(id, e.target.value as BookingStatus)
-                              }
-                              disabled={isUpdating}
-                              className={cn(
-                                "h-8 rounded-lg border border-input bg-background px-2 text-xs font-medium outline-none transition-colors focus-visible:border-ring",
-                                isUpdating && "opacity-50"
-                              )}
-                            >
-                              {bookingStatuses.map((st) => (
-                                <option key={st} value={st}>
-                                  {st}
-                                </option>
-                              ))}
-                            </select>
-                            {isUpdating && <RefreshCw className="size-3 animate-spin text-primary" />}
-                          </div>
+                          <BookingBadge status={rental.bookingStatus} />
                         </td>
 
                         {/* Action Column */}
@@ -589,10 +546,6 @@ export default function MyEquipmentRentalPage() {
           <RentalDetailsModal
             rental={viewRental}
             onClose={() => setViewRental(null)}
-            onStatusChange={(newStatus) => {
-              const id = viewRental._id || viewRental.id
-              if (id) handleStatusChange(id, newStatus)
-            }}
           />
         )}
       </div>
@@ -606,11 +559,9 @@ export default function MyEquipmentRentalPage() {
 function RentalDetailsModal({
   rental,
   onClose,
-  onStatusChange,
 }: {
   rental: RentalBooking
   onClose: () => void
-  onStatusChange: (status: BookingStatus) => void
 }) {
   return (
     <div
@@ -741,7 +692,7 @@ function RentalDetailsModal({
                 </div>
                 <div className="flex justify-between pt-2 text-base font-bold text-foreground">
                   <span>Total Amount:</span>
-                  <span>${Number(rental.totalAmount || 0).toLocaleString()}</span>
+                  <span>৳{Number(rental.totalAmount || 0).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -758,25 +709,6 @@ function RentalDetailsModal({
               </div>
             </div>
           )}
-
-          {/* Quick Status Update */}
-          <div className="space-y-2 rounded-xl border bg-muted/30 p-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Update Booking Status
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {bookingStatuses.map((status) => (
-                <Button
-                  key={status}
-                  variant={rental.bookingStatus === status ? "default" : "outline"}
-                  size="xs"
-                  onClick={() => onStatusChange(status)}
-                >
-                  {status}
-                </Button>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
