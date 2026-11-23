@@ -493,7 +493,7 @@ export default function MyEquipmentPage() {
                         {/* Rental Price Column */}
                         <td className="px-4 py-3.5">
                           <div className="font-semibold text-foreground">
-                            ${Number(item.rentalPrice).toLocaleString()}
+                            ৳{Number(item.rentalPrice).toLocaleString()}
                             <span className="ml-1 text-xs font-normal text-muted-foreground">
                               / {item.rentalType}
                             </span>
@@ -683,7 +683,7 @@ function ViewDetailsModal({
               <div className="rounded-xl bg-muted/60 p-3">
                 <span className="text-xs text-muted-foreground">Rental Rate</span>
                 <div className="text-2xl font-black text-foreground">
-                  ${Number(item.rentalPrice).toLocaleString()}
+                  ৳{Number(item.rentalPrice).toLocaleString()}
                   <span className="ml-1 text-xs font-medium text-muted-foreground">
                     / {item.rentalType}
                   </span>
@@ -965,7 +965,7 @@ function UpdateEquipmentModal({
 
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground">
-                  Rental Price ($) <span className="text-destructive">*</span>
+                  Rental Price (৳) <span className="text-destructive">*</span>
                 </label>
                 <input
                   type="number"

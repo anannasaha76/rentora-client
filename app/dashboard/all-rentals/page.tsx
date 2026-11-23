@@ -7,11 +7,11 @@ import {
   AlertCircle,
   AlertTriangle,
   ArrowRight,
+  BangladeshiTaka,
   Calendar,
   Check,
   CheckCircle2,
   Clock,
-  DollarSign,
   ExternalLink,
   Eye,
   Filter,
@@ -201,7 +201,7 @@ export default function AdminAllRentalsPage() {
                 </h3>
               </div>
               <div className="rounded-xl bg-emerald-500/10 p-2.5 text-emerald-600 dark:text-emerald-400">
-                <DollarSign className="size-5" />
+                <BangladeshiTaka className="size-5" />
               </div>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">

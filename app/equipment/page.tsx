@@ -411,7 +411,7 @@ export default function AllEquipmentPage() {
 
             {/* Price Range Filter */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-muted-foreground">Price Range ($)</label>
+              <label className="text-xs font-semibold text-muted-foreground">Price Range (৳)</label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -479,7 +479,7 @@ export default function AllEquipmentPage() {
                 )}
                 {(minPrice || maxPrice) && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-secondary-foreground font-medium">
-                    ${minPrice || "0"} – ${maxPrice || "Any"}
+                    ৳{minPrice || "0"} – ৳{maxPrice || "Any"}
                     <button
                       type="button"
                       onClick={() => {
@@ -705,7 +705,7 @@ export default function AllEquipmentPage() {
                             Rental Price
                           </span>
                           <div className="text-lg font-extrabold text-foreground leading-tight">
-                            ${Number(item.rentalPrice).toLocaleString()}
+                            ৳{Number(item.rentalPrice).toLocaleString()}
                             <span className="ml-1 text-xs font-normal text-muted-foreground">
                               / {item.rentalType || "Daily"}
                             </span>

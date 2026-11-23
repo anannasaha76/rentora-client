@@ -4,11 +4,11 @@ import * as React from "react"
 import Link from "next/link"
 import {
   AlertTriangle,
+  BangladeshiTaka,
   Calendar,
   CheckCircle2,
   Clock,
   CreditCard,
-  DollarSign,
   Eye,
   Filter,
   Layers,
@@ -270,9 +270,9 @@ export default function MyRentalsPage() {
           <div className="rounded-xl border bg-card p-4 text-card-foreground shadow-xs">
             <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400">
               <span className="text-xs font-medium">Total Spent</span>
-              <DollarSign className="size-4" />
+              <BangladeshiTaka className="size-4" />
             </div>
-            <p className="mt-2 text-2xl font-bold">${totalSpent.toLocaleString()}</p>
+            <p className="mt-2 text-2xl font-bold">৳{totalSpent.toLocaleString()}</p>
           </div>
         </div>
 
@@ -496,7 +496,7 @@ export default function MyRentalsPage() {
                         {/* 5. Total Amount */}
                         <td className="px-4 py-3.5">
                           <span className="font-bold text-foreground">
-                            ${Number(rental.totalAmount || 0).toLocaleString()}
+                            ৳{Number(rental.totalAmount || 0).toLocaleString()}
                           </span>
                         </td>
 
@@ -655,7 +655,7 @@ function CustomerRentalDetailsModal({
               <div className="flex items-center justify-between border-t pt-2 font-bold text-foreground">
                 <span>Total Amount Paid:</span>
                 <span className="text-base">
-                  ${Number(rental.totalAmount || 0).toLocaleString()}
+                  ৳{Number(rental.totalAmount || 0).toLocaleString()}
                 </span>
               </div>
             </div>

@@ -7,11 +7,11 @@ import {
   AlertCircle,
   ArrowRight,
   ArrowUpRight,
+  BangladeshiTaka,
   BarChart3,
   Calendar,
   CheckCircle2,
   Clock,
-  DollarSign,
   Heart,
   Layers,
   Package,
@@ -351,7 +351,7 @@ export default function DashboardPage() {
                     Total Revenue
                   </span>
                   <div className="rounded-lg bg-emerald-500/10 p-2 text-emerald-600 dark:text-emerald-400">
-                    <DollarSign className="size-4" />
+                    <BangladeshiTaka className="size-4" />
                   </div>
                 </div>
                 <h3 className="mt-2 text-xl font-bold text-emerald-600 dark:text-emerald-400 truncate">
@@ -688,7 +688,7 @@ export default function DashboardPage() {
                     Total Earnings
                   </span>
                   <div className="rounded-xl bg-emerald-500/10 p-2.5 text-emerald-600 dark:text-emerald-400">
-                    <DollarSign className="size-5" />
+                    <BangladeshiTaka className="size-5" />
                   </div>
                 </div>
                 <h3 className="mt-2 text-3xl font-bold text-emerald-600 dark:text-emerald-400 truncate">

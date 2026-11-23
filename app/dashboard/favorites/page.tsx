@@ -6,7 +6,6 @@ import {
   AlertTriangle,
   Calendar,
   CheckCircle2,
-  DollarSign,
   Eye,
   Filter,
   Heart,

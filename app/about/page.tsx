@@ -1,8 +1,8 @@
 import Link from "next/link"
 import {
   ArrowRight,
+  BangladeshiTaka,
   CheckCircle2,
-  DollarSign,
   Heart,
   Package,
   ShieldCheck,
@@ -70,7 +70,7 @@ export default function AboutPage() {
 
           <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-xs space-y-3">
             <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <DollarSign className="size-5" />
+              <BangladeshiTaka className="size-5" />
             </div>
             <h3 className="text-base font-bold text-foreground">Transparent Economics</h3>
             <p className="text-xs text-muted-foreground leading-relaxed">

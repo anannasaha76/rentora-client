@@ -426,7 +426,7 @@ export default function AdminAllEquipmentPage() {
                         {/* 4. Rental Rate */}
                         <td className="px-4 py-3.5">
                           <span className="font-bold text-foreground">
-                            ${Number(item.rentalPrice).toLocaleString()}
+                            ৳{Number(item.rentalPrice).toLocaleString()}
                           </span>
                           <span className="text-xs text-muted-foreground">
                             /{item.rentalType?.toLowerCase() || "day"}
@@ -588,7 +588,7 @@ export default function AdminAllEquipmentPage() {
                   <div>
                     <span className="text-muted-foreground">Rate:</span>
                     <p className="font-bold text-primary">
-                      ${viewingItem.rentalPrice}/{viewingItem.rentalType?.toLowerCase()}
+                      ৳{viewingItem.rentalPrice}/{viewingItem.rentalType?.toLowerCase()}
                     </p>
                   </div>
                   <div>
@@ -834,7 +834,7 @@ function UpdateEquipmentModal({
           {/* Price, Rental Type, Quantity */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
-              <label className="block text-xs font-medium text-foreground">Rental Price ($) *</label>
+              <label className="block text-xs font-medium text-foreground">Rental Price (৳) *</label>
               <input
                 type="number"
                 required

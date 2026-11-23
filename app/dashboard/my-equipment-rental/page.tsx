@@ -3,10 +3,10 @@
 import * as React from "react"
 import {
   AlertTriangle,
+  BangladeshiTaka,
   Calendar,
   CheckCircle2,
   Clock,
-  DollarSign,
   Eye,
   Filter,
   Layers,
@@ -254,7 +254,7 @@ export default function MyEquipmentRentalPage() {
           <div className="rounded-xl border bg-card p-4 text-card-foreground shadow-xs">
             <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400">
               <span className="text-xs font-medium">Total Paid Revenue</span>
-              <DollarSign className="size-4" />
+              <BangladeshiTaka className="size-4" />
             </div>
             <p className="mt-2 text-2xl font-bold">৳{totalRevenue.toLocaleString()}</p>
           </div>

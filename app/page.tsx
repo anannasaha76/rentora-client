@@ -7,12 +7,12 @@ import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import {
   ArrowRight,
+  BangladeshiTaka,
   Calendar,
   Camera,
   CheckCircle2,
   Clock,
   Cpu,
-  DollarSign,
   HardHat,
   HelpCircle,
   Layers,
@@ -69,7 +69,7 @@ const platformBenefits = [
     title: "Affordable Rental Prices",
     description:
       "Direct peer-to-peer and owner-to-business rates without intermediary markups. Save up to 40% compared to traditional rental brokers.",
-    icon: DollarSign,
+    icon: BangladeshiTaka,
     color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   },
   {
@@ -809,7 +809,7 @@ export default function HomePage() {
           <div className="grid items-center gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-bold text-primary">
-                <DollarSign className="size-3.5" />
+                <BangladeshiTaka className="size-3.5" />
                 <span>Monetize Your Machinery</span>
               </span>
               <h3 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl lg:text-4xl">

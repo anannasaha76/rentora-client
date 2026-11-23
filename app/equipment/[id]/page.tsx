@@ -423,7 +423,7 @@ export default function EquipmentDetailsPage() {
                     <div className="rounded-xl border bg-muted/40 p-3">
                       <span className="text-xs text-muted-foreground">Rental Rate</span>
                       <p className="mt-1 text-base font-bold text-primary">
-                        ${equipment.rentalPrice}
+                        ৳{equipment.rentalPrice}
                         <span className="text-xs font-normal text-muted-foreground">
                           /{equipment.rentalType.toLowerCase()}
                         </span>
@@ -545,7 +545,7 @@ export default function EquipmentDetailsPage() {
                       </span>
                       <div className="mt-1 flex items-baseline gap-1">
                         <span className="text-3xl font-extrabold tracking-tight text-primary">
-                          ${equipment.rentalPrice}
+                          ৳{equipment.rentalPrice}
                         </span>
                         <span className="text-sm text-muted-foreground">
                           /{equipment.rentalType.toLowerCase()}
@@ -713,7 +713,7 @@ export default function EquipmentDetailsPage() {
                   </h4>
                   <p className="text-xs text-muted-foreground">{equipment.location}</p>
                   <p className="mt-0.5 text-xs font-semibold text-primary">
-                    ${equipment.rentalPrice} / {equipment.rentalType.toLowerCase()}
+                    ৳{equipment.rentalPrice} / {equipment.rentalType.toLowerCase()}
                   </p>
                 </div>
               </div>
@@ -902,7 +902,7 @@ export default function EquipmentDetailsPage() {
                 <div className="flex justify-between border-t pt-2 font-semibold">
                   <span className="text-muted-foreground">Total Paid:</span>
                   <span className="text-primary font-bold">
-                    ${confirmedBooking.totalAmount.toFixed(2)}
+                    ৳{confirmedBooking.totalAmount.toFixed(2)}
                   </span>
                 </div>
               </div>
