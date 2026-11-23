@@ -82,7 +82,7 @@ export function AuthRouteGuard({
   if (
     allowedRoles &&
     allowedRoles.length > 0 &&
-    !allowedRoles.includes(session.user.role || "customer")
+    !allowedRoles.map(normalizeRole).includes(normalizeRole(session.user.role))
   ) {
     return (
       <div className="mx-auto flex min-h-[50vh] max-w-md items-center justify-center px-4 sm:px-6">
