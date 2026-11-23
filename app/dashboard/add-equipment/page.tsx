@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { useSession } from "@/lib/auth-client"
 import { getAuthHeaders } from "@/lib/getTokenFromClient"
 import {
+  defaultCategories,
   equipmentApiUrl,
   type EquipmentFormValues,
   type RentalType,
@@ -18,17 +19,6 @@ const inputClass =
   "flex h-9 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
 const textareaClass =
   "min-h-28 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-
-const categories = [
-  "Excavators",
-  "Loaders",
-  "Cranes",
-  "Forklifts",
-  "Tractors",
-  "Generators",
-  "Power Tools",
-  "Other",
-]
 
 const rentalTypes: RentalType[] = ["Daily", "Weekly", "Monthly"]
 
@@ -223,7 +213,7 @@ function AddEquipmentForm() {
               required
             >
               <option value="">Select a category</option>
-              {categories.map((category) => (
+              {defaultCategories.map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>

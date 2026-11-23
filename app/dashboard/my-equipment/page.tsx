@@ -46,13 +46,8 @@ const defaultCategories = [
   "Agriculture Equipment",
   "Electronics",
   "Event Equipment",
-  "Excavators",
-  "Loaders",
-  "Cranes",
-  "Forklifts",
-  "Tractors",
-  "Generators",
-  "Power Tools",
+  "Clean Equipment",
+  "Power Equipment",
   "Other",
 ]
 

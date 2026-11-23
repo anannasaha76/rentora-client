@@ -58,8 +58,8 @@ function getCategoryIcon(title: string) {
   if (t.includes("electr") || t.includes("sound") || t.includes("audio") || t.includes("drone")) return Cpu
   if (t.includes("event") || t.includes("party") || t.includes("stage")) return PartyPopper
   if (t.includes("tool") || t.includes("drill") || t.includes("wrench")) return Wrench
-  if (t.includes("excavat")) return HardHat
-  if (t.includes("generat")) return Sparkles
+  if (t.includes("clean")) return Sparkles
+  if (t.includes("power")) return Wrench
   return Package
 }
 
