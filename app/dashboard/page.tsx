@@ -33,7 +33,6 @@ import {
   getAdminAnalytics,
   getOwnerAnalytics,
   type AdminAnalyticsResponse,
-  type MonthlyBookingStat,
   type OwnerAnalyticsResponse,
 } from "@/lib/analytics"
 import { useSession } from "@/lib/auth-client"
@@ -57,6 +56,206 @@ function formatDate(dateValue?: string | Date) {
   } catch {
     return String(dateValue)
   }
+}
+
+function formatCompactCurrency(amount?: number) {
+  const val = Number(amount) || 0
+  if (val >= 100000) return `৳${(val / 100000).toFixed(1).replace(/\.0$/, "")}L`
+  if (val >= 1000) return `৳${(val / 1000).toFixed(1).replace(/\.0$/, "")}k`
+  return `৳${val}`
+}
+
+type TrendDatum = {
+  label: string
+  shortLabel?: string
+  bookings: number
+  revenue: number
+}
+
+function MonthlyTrendChart({ data }: { data: TrendDatum[] }) {
+  const width = 560
+  const height = 230
+  const padX = 18
+  const padTop = 18
+  const padBottom = 34
+  const innerW = width - padX * 2
+  const innerH = height - padTop - padBottom
+  const baseline = padTop + innerH
+  const maxBookings = Math.max(1, ...data.map((d) => d.bookings))
+  const maxRevenue = Math.max(1, ...data.map((d) => d.revenue))
+  const step = innerW / Math.max(data.length, 1)
+  const barWidth = Math.min(34, step * 0.3)
+
+  const points = data.map((d, i) => ({
+    x: padX + step * i + step / 2,
+    y: padTop + innerH - (d.revenue / maxRevenue) * innerH,
+  }))
+  const linePath = points
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+    .join(" ")
+  const areaPath = points.length
+    ? `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${baseline} L ${points[0].x.toFixed(1)} ${baseline} Z`
+    : ""
+
+  return (
+    <div>
+      <div className="mb-2 flex flex-wrap items-center gap-4 text-[11px] text-muted-foreground">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="size-2.5 rounded-sm bg-sky-500" />
+          Bookings
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="size-2.5 rounded-full bg-emerald-500" />
+          Revenue
+        </span>
+      </div>
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="h-60 w-full"
+        role="img"
+        aria-label="Monthly bookings and revenue trend"
+      >
+        {[0, 1, 2, 3, 4].map((i) => {
+          const y = padTop + (innerH / 4) * i
+          return (
+            <g key={i}>
+              <line
+                x1={padX}
+                x2={width - padX}
+                y1={y}
+                y2={y}
+                className="stroke-border/70"
+                strokeDasharray="4 4"
+              />
+              <text x={padX} y={y - 5} className="fill-muted-foreground text-[9px]">
+                {formatCompactCurrency(maxRevenue * (1 - i / 4))}
+              </text>
+            </g>
+          )
+        })}
+        {data.map((d, i) => {
+          const barHeight = (d.bookings / maxBookings) * innerH
+          return (
+            <g key={d.label}>
+              <rect
+                x={points[i].x - barWidth / 2}
+                y={baseline - barHeight}
+                width={barWidth}
+                height={Math.max(barHeight, d.bookings > 0 ? 3 : 0)}
+                rx={4}
+                className="fill-sky-500/60"
+              >
+                <title>{`${d.label}: ${d.bookings} booking${d.bookings === 1 ? "" : "s"}`}</title>
+              </rect>
+              <text
+                x={points[i].x}
+                y={height - 10}
+                textAnchor="middle"
+                className="fill-muted-foreground text-[10px]"
+              >
+                {d.shortLabel || d.label}
+              </text>
+            </g>
+          )
+        })}
+        {areaPath && <path d={areaPath} className="fill-emerald-500/10" />}
+        {linePath && (
+          <path
+            d={linePath}
+            fill="none"
+            className="stroke-emerald-500"
+            strokeWidth={2.5}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        )}
+        {points.map((p, i) => (
+          <circle
+            key={data[i].label}
+            cx={p.x}
+            cy={p.y}
+            r={4}
+            className="fill-emerald-500 stroke-card"
+            strokeWidth={2}
+          >
+            <title>{`${data[i].label}: ${formatCurrency(data[i].revenue)}`}</title>
+          </circle>
+        ))}
+      </svg>
+    </div>
+  )
+}
+
+type DonutSegment = {
+  label: string
+  value: number
+  stroke: string
+  dot: string
+}
+
+function DonutChart({
+  segments,
+  centerLabel,
+}: {
+  segments: DonutSegment[]
+  centerLabel: string
+}) {
+  const radius = 40
+  const circumference = 2 * Math.PI * radius
+  const total = segments.reduce((sum, s) => sum + Math.max(0, s.value), 0)
+  let offset = 0
+
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
+      <div className="relative size-32 shrink-0">
+        <svg
+          viewBox="0 0 100 100"
+          className="size-32 -rotate-90"
+          role="img"
+          aria-label={centerLabel}
+        >
+          <circle cx="50" cy="50" r={radius} fill="none" className="stroke-muted" strokeWidth={11} />
+          {total > 0 &&
+            segments.map((segment) => {
+              const raw = (Math.max(0, segment.value) / total) * circumference
+              const length = Math.max(raw - 2, 0)
+              const dashOffset = -offset
+              offset += raw
+              return (
+                <circle
+                  key={segment.label}
+                  cx="50"
+                  cy="50"
+                  r={radius}
+                  fill="none"
+                  strokeWidth={11}
+                  strokeDasharray={`${length} ${circumference - length}`}
+                  strokeDashoffset={dashOffset}
+                  className={segment.stroke}
+                >
+                  <title>{`${segment.label}: ${segment.value}`}</title>
+                </circle>
+              )
+            })}
+        </svg>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-xl font-bold text-foreground">{total}</span>
+          <span className="text-[10px] text-muted-foreground">{centerLabel}</span>
+        </div>
+      </div>
+      <div className="grid min-w-32 gap-2">
+        {segments.map((segment) => (
+          <div key={segment.label} className="flex items-center justify-between gap-4 text-xs">
+            <span className="flex items-center gap-2 text-muted-foreground">
+              <span className={cn("size-2.5 rounded-full", segment.dot)} />
+              {segment.label}
+            </span>
+            <span className="font-semibold text-foreground">{segment.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 // Quick Navigation Cards
@@ -391,42 +590,15 @@ export default function DashboardPage() {
                     No monthly trend data recorded yet.
                   </div>
                 ) : (
-                  <div className="mt-6 space-y-4">
-                    {adminData.monthlyBookingStats.map((item: MonthlyBookingStat) => {
-                      const maxRevenue = Math.max(
-                        ...adminData.monthlyBookingStats.map((m) => m.revenue),
-                        1000
-                      )
-                      const revenuePercent = Math.min(
-                        100,
-                        Math.round((item.revenue / maxRevenue) * 100)
-                      )
-
-                      return (
-                        <div key={item.key} className="space-y-1.5">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-semibold text-foreground">
-                              {item.label}
-                            </span>
-                            <div className="flex items-center gap-3">
-                              <span className="text-muted-foreground">
-                                {item.bookings} booking{item.bookings === 1 ? "" : "s"}
-                              </span>
-                              <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                                {formatCurrency(item.revenue)}
-                              </span>
-                            </div>
-                          </div>
-                          {/* Progress bar visual */}
-                          <div className="h-3 w-full overflow-hidden rounded-full bg-muted/70">
-                            <div
-                              className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-500 transition-all duration-500"
-                              style={{ width: `${Math.max(revenuePercent, item.bookings > 0 ? 5 : 2)}%` }}
-                            />
-                          </div>
-                        </div>
-                      )
-                    })}
+                  <div className="mt-4">
+                    <MonthlyTrendChart
+                      data={adminData.monthlyBookingStats.map((item) => ({
+                        label: item.label,
+                        shortLabel: item.shortMonth,
+                        bookings: item.bookings,
+                        revenue: item.revenue,
+                      }))}
+                    />
                   </div>
                 )}
               </div>
@@ -439,82 +611,29 @@ export default function DashboardPage() {
                     <Package className="size-4 text-primary" />
                     <span>Equipment Moderation</span>
                   </h4>
-                  <div className="mt-4 space-y-3">
-                    <div>
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Approved</span>
-                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                          {adminData?.equipmentBreakdown.approvedEquipment ?? 0}
-                        </span>
-                      </div>
-                      <div className="mt-1 h-2 w-full rounded-full bg-muted">
-                        <div
-                          className="h-full rounded-full bg-emerald-500"
-                          style={{
-                            width: `${
-                              adminData?.equipmentBreakdown.totalEquipment
-                                ? Math.round(
-                                    (adminData.equipmentBreakdown.approvedEquipment /
-                                      adminData.equipmentBreakdown.totalEquipment) *
-                                      100
-                                  )
-                                : 0
-                            }%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Pending Approval</span>
-                        <span className="font-semibold text-amber-600 dark:text-amber-400">
-                          {adminData?.equipmentBreakdown.pendingApprovals ?? 0}
-                        </span>
-                      </div>
-                      <div className="mt-1 h-2 w-full rounded-full bg-muted">
-                        <div
-                          className="h-full rounded-full bg-amber-500"
-                          style={{
-                            width: `${
-                              adminData?.equipmentBreakdown.totalEquipment
-                                ? Math.round(
-                                    (adminData.equipmentBreakdown.pendingApprovals /
-                                      adminData.equipmentBreakdown.totalEquipment) *
-                                      100
-                                  )
-                                : 0
-                            }%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Rejected</span>
-                        <span className="font-semibold text-rose-600 dark:text-rose-400">
-                          {adminData?.equipmentBreakdown.rejectedEquipment ?? 0}
-                        </span>
-                      </div>
-                      <div className="mt-1 h-2 w-full rounded-full bg-muted">
-                        <div
-                          className="h-full rounded-full bg-rose-500"
-                          style={{
-                            width: `${
-                              adminData?.equipmentBreakdown.totalEquipment
-                                ? Math.round(
-                                    (adminData.equipmentBreakdown.rejectedEquipment /
-                                      adminData.equipmentBreakdown.totalEquipment) *
-                                      100
-                                  )
-                                : 0
-                            }%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <DonutChart
+                    centerLabel="Listings"
+                    segments={[
+                      {
+                        label: "Approved",
+                        value: adminData?.equipmentBreakdown.approvedEquipment ?? 0,
+                        stroke: "stroke-emerald-500",
+                        dot: "bg-emerald-500",
+                      },
+                      {
+                        label: "Pending",
+                        value: adminData?.equipmentBreakdown.pendingApprovals ?? 0,
+                        stroke: "stroke-amber-500",
+                        dot: "bg-amber-500",
+                      },
+                      {
+                        label: "Rejected",
+                        value: adminData?.equipmentBreakdown.rejectedEquipment ?? 0,
+                        stroke: "stroke-rose-500",
+                        dot: "bg-rose-500",
+                      },
+                    ]}
+                  />
                 </div>
 
                 {/* User Roles Ratio */}
@@ -523,26 +642,29 @@ export default function DashboardPage() {
                     <Users className="size-4 text-primary" />
                     <span>User Roles Breakdown</span>
                   </h4>
-                  <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                    <div className="rounded-xl border border-border/70 bg-muted/30 p-2.5">
-                      <p className="text-[11px] text-muted-foreground">Customers</p>
-                      <p className="mt-1 text-base font-bold text-foreground">
-                        {adminData?.usersBreakdown.customerCount ?? 0}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-border/70 bg-muted/30 p-2.5">
-                      <p className="text-[11px] text-muted-foreground">Owners</p>
-                      <p className="mt-1 text-base font-bold text-foreground">
-                        {adminData?.usersBreakdown.ownerCount ?? 0}
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-border/70 bg-muted/30 p-2.5">
-                      <p className="text-[11px] text-muted-foreground">Admins</p>
-                      <p className="mt-1 text-base font-bold text-foreground">
-                        {adminData?.usersBreakdown.adminCount ?? 0}
-                      </p>
-                    </div>
-                  </div>
+                  <DonutChart
+                    centerLabel="Users"
+                    segments={[
+                      {
+                        label: "Customers",
+                        value: adminData?.usersBreakdown.customerCount ?? 0,
+                        stroke: "stroke-primary",
+                        dot: "bg-primary",
+                      },
+                      {
+                        label: "Owners",
+                        value: adminData?.usersBreakdown.ownerCount ?? 0,
+                        stroke: "stroke-sky-500",
+                        dot: "bg-sky-500",
+                      },
+                      {
+                        label: "Admins",
+                        value: adminData?.usersBreakdown.adminCount ?? 0,
+                        stroke: "stroke-violet-500",
+                        dot: "bg-violet-500",
+                      },
+                    ]}
+                  />
                 </div>
               </div>
             </div>
@@ -746,43 +868,15 @@ export default function DashboardPage() {
                     No earnings history recorded yet.
                   </div>
                 ) : (
-                  <div className="mt-6 space-y-4">
-                    {ownerData.monthlyEarnings.map((item: MonthlyBookingStat) => {
-                      const maxEarnings = Math.max(
-                        ...ownerData.monthlyEarnings.map((m) => m.earnings || m.revenue || 0),
-                        5000
-                      )
-                      const currentVal = item.earnings || item.revenue || 0
-                      const earnPercent = Math.min(
-                        100,
-                        Math.round((currentVal / maxEarnings) * 100)
-                      )
-
-                      return (
-                        <div key={item.key} className="space-y-1.5">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-semibold text-foreground">
-                              {item.label}
-                            </span>
-                            <div className="flex items-center gap-3">
-                              <span className="text-muted-foreground">
-                                {item.bookings} rental{item.bookings === 1 ? "" : "s"}
-                              </span>
-                              <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                                {formatCurrency(currentVal)}
-                              </span>
-                            </div>
-                          </div>
-                          {/* Progress bar visual */}
-                          <div className="h-3 w-full overflow-hidden rounded-full bg-muted/70">
-                            <div
-                              className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-sky-500 transition-all duration-500"
-                              style={{ width: `${Math.max(earnPercent, item.bookings > 0 ? 5 : 2)}%` }}
-                            />
-                          </div>
-                        </div>
-                      )
-                    })}
+                  <div className="mt-4">
+                    <MonthlyTrendChart
+                      data={ownerData.monthlyEarnings.map((item) => ({
+                        label: item.label,
+                        shortLabel: item.shortMonth,
+                        bookings: item.bookings,
+                        revenue: item.earnings ?? item.revenue ?? 0,
+                      }))}
+                    />
                   </div>
                 )}
               </div>
@@ -797,37 +891,31 @@ export default function DashboardPage() {
                   Approval status of your listed rental inventory
                 </p>
 
-                <div className="mt-5 space-y-4">
-                  <div className="flex items-center justify-between rounded-xl border border-border/70 bg-muted/30 p-3.5">
-                    <div className="flex items-center gap-2.5">
-                      <span className="size-2.5 rounded-full bg-emerald-500" />
-                      <span className="text-sm font-medium text-foreground">Approved & Live</span>
-                    </div>
-                    <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">
-                      {ownerData?.equipmentBreakdown.approvedEquipment ?? 0}
-                    </span>
-                  </div>
+                <DonutChart
+                  centerLabel="Equipment"
+                  segments={[
+                    {
+                      label: "Approved",
+                      value: ownerData?.equipmentBreakdown.approvedEquipment ?? 0,
+                      stroke: "stroke-emerald-500",
+                      dot: "bg-emerald-500",
+                    },
+                    {
+                      label: "Pending",
+                      value: ownerData?.equipmentBreakdown.pendingApprovals ?? 0,
+                      stroke: "stroke-amber-500",
+                      dot: "bg-amber-500",
+                    },
+                    {
+                      label: "Rejected",
+                      value: ownerData?.equipmentBreakdown.rejectedEquipment ?? 0,
+                      stroke: "stroke-rose-500",
+                      dot: "bg-rose-500",
+                    },
+                  ]}
+                />
 
-                  <div className="flex items-center justify-between rounded-xl border border-border/70 bg-muted/30 p-3.5">
-                    <div className="flex items-center gap-2.5">
-                      <span className="size-2.5 rounded-full bg-amber-500" />
-                      <span className="text-sm font-medium text-foreground">Under Review</span>
-                    </div>
-                    <span className="text-base font-bold text-amber-600 dark:text-amber-400">
-                      {ownerData?.equipmentBreakdown.pendingApprovals ?? 0}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between rounded-xl border border-border/70 bg-muted/30 p-3.5">
-                    <div className="flex items-center gap-2.5">
-                      <span className="size-2.5 rounded-full bg-rose-500" />
-                      <span className="text-sm font-medium text-foreground">Rejected / Needs Fix</span>
-                    </div>
-                    <span className="text-base font-bold text-rose-600 dark:text-rose-400">
-                      {ownerData?.equipmentBreakdown.rejectedEquipment ?? 0}
-                    </span>
-                  </div>
-
+                <div className="mt-5">
                   <Link
                     href="/dashboard/add-equipment"
                     className={cn(
